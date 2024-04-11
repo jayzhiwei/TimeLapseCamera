@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Home Page</title>
+    <link rel="icon" href="\Icon\image.ico" type="image/x-icon">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f0f0f0;
+        }
+
+        header {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 15px;
+            text-align: center;
+        }
+
+        main {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            color: #4caf50;
+        }
+
+        #videoGallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-around;
+        }
+
+        .videoCard {
+            width: 200px;
+            margin: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .videoCard img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+        }
+
+        footer {
+            background-color: #4caf50;
+            color: #fff;
+            padding: 10px;
+            text-align: right; /* Align text to the right */
+            position: fixed;
+            top: 0; /* Position it at the top */
+            right: 0; /* Align it to the right */
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>Welcome to Time-Lapse Camera</h1>
+    </header>
+
+    <main>
+        <h2>Your Time-Lapse Videos</h2>
+
+        <div id="videoGallery">
+            <!-- Example video card -->
+            <div class="videoCard">
+                <img src="path/to/thumbnail.jpg" alt="Video Thumbnail">
+                <p>Video Title</p>
+            </div>
+
+            <!-- Add more video cards as needed -->
+
+        </div>
+    </main>
+
+    <footer>
+        <button onclick="logout()">Logout</button>
+    </footer>
+
+    <script>
+        function logout() {
+            // Add logic for logging out
+            alert('Logged out successfully.');
+            // Redirect to the login page or perform any other necessary actions
+            window.location.href = '/Homepage/index.html'; // Replace with your login page URL
+        }
+    </script>
+        Other function
+    </script>
+
+
+</body>
+</html>
+

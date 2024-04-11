@@ -1,0 +1,92 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f0f0f0;
+    position: relative;
+}
+
+header {
+    background-color: #333;
+    color: #fff;
+    text-align: center;
+    padding: 1em;
+    margin-top: 42px;
+}
+
+nav {
+    background-color: #444;
+    color: #fff;
+    text-align: center;
+    padding: 0.5em;
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000; /* Ensure it's above other elements */
+}
+
+nav a {
+    text-decoration: none;
+    color: #fff;
+    margin: 0 1em;
+}
+
+main {
+    padding: 2em;
+}
+
+p {
+    margin: 1px 0; /* Adjust the top and bottom margin as needed */
+}
+
+footer-line {
+    display: block;
+    margin-top: 20px;
+    border-top: 1px solid #aaaaaa;
+}
+
+copyright-text {
+    text-align: center;
+    padding: 10px;
+    color: #777;
+}
+
+#video-container {
+    position: relative;
+}
+
+#playPauseBtn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(128, 128, 128, 0.5); /* Half-transparent grey */
+    border: none;
+    border-radius: 50%;
+    padding: 10px;
+    cursor: pointer;
+    color: #fff;
+}
+
+.circle-btn {
+    width: 35px; /* Set your preferred width */
+    height: 35px; /* Set your preferred height */
+    border-radius: 50%;
+    background-color: rgba(128, 128, 128, 0.35); /* Half-transparent grey color */
+    border: none; /* Remove border */
+    cursor: pointer;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.icon-container {
+    display: inline-block;
+    width: 23px;
+    height: auto;
+    margin-right: 10px;
+}
+
+.icon-svg {
+    width: 100%;
+    height: 100%;
+}

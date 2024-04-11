@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Time-Lapse Camera ZW</title>
+    <link rel="icon" href="\Icon\image.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" integrity="sha512-...your-sha-hash-here..." crossorigin="anonymous" />
+
+</head>
+<body>
+    <header>
+        <h1>Time-Lapse Camera</h1>
+    </header>
+
+    <nav>
+        <a href="#home" class="icon-container">
+            <img src="/Icon/image.svg" alt="Home Icon" class="icon-svg">
+        </a>
+        <a href="#gallery">Gallery</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+        <a href="/Login/login.html">
+            <i class="fas fa-user-alt"></i>
+            Sign in
+        </a>
+    </nav>
+
+    <main>
+        <h2>Welcome to our Time-Lapse Camera Website</h2>
+        <p>Explore stunning time-lapse videos captured by our advanced camera.</p>
+        <!-- Add more content as needed -->
+    </main>
+
+    <div id="video-container">
+        <video id="myVideo" width="100%" height="auto" autoplay muted>
+            <source src="/WebMedia/DemoVideo.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+        <!-- Use Font Awesome icons for play and pause directly in the button -->
+        <button id="playPauseBtn" onclick="togglePlayPause()" class="circle-btn">
+            <i class="fas fa-play"></i>
+        </button>
+    </div>
+    
+    <p>&nbsp;</p>
+    <footer-line></footer-line>
+    <p>&nbsp;</p>
+    <copyright-text>Copyright &copy; 2023 Time-Lapse Camera Company. All rights reserved.</copyright-text>
+    <p>&nbsp;</p>
+
+    <script src="script.js"></script>
+
+</body>
+</html>

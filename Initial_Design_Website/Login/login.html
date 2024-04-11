@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login or Sign Up</title>
+    <link rel="icon" href="\Icon\image.ico" type="image/x-icon">
+    <link rel="stylesheet" href="styles.css">
+
+</head>
+<body>
+    <nav>
+        <a href="/Homepage/index.html" class="icon-container">
+            <img src="/Icon/image.svg" alt="Home Icon" class="icon-svg">
+        </a>
+        <a href="#gallery">Gallery</a>
+        <a href="#about">About</a>
+        <a href="#contact">Contact</a>
+    </nav>
+
+    <form id="authForm">
+        <h2>Login or Sign Up</h2>
+
+        <!-- Login Section -->
+        <div id="loginSection">
+            <label for="loginUsername">Username:</label>
+            <input type="text" id="loginUsername" name="loginUsername" required>
+
+            <label for="loginPassword">Password:</label>
+            <input type="password" id="loginPassword" name="loginPassword" required>
+
+            <button type="button" onclick="login()">Login</button>
+        </div>
+
+        <!-- Signup Section -->
+        <div id="signupSection" style="display: none;">
+            <!-- Step 1: Confirm Email -->
+            <label for="signupEmail">Email:</label>
+            <input type="email" id="signupEmail" name="signupEmail" required>
+
+            <button type="button" onclick="sendOTP()">Get OTP</button>
+
+            <!-- Step 2: Enter OTP -->
+            <label for="otp">Enter OTP:</label>
+            <input type="text" id="otp" name="otp" required>
+
+            <!-- New OTP Submit Button -->
+            <button type="button" onclick="submitOTP()">Submit OTP</button>
+
+            <!-- Step 3: Enter Username and Password -->
+            <div id="signupDetails">
+                <label for="signupUsername">Username:</label>
+                <input type="text" id="signupUsername" name="signupUsername" required>
+
+                <label for="signupPassword">Password:</label>
+                <input type="password" id="signupPassword" name="signupPassword" required>
+
+                <label for="confirmPassword">Confirm Password:</label>
+                <input type="password" id="confirmPassword" name="confirmPassword" required>
+
+                <button type="button" onclick="signup()">Sign Up</button>
+            </div>
+        </div>
+
+        <!-- Toggle between login and signup sections -->
+        <p id="toggleLink">Don't have an account? <a href="#" onclick="toggleAuthSection()">Sign Up</a></p>
+
+        <!-- Back button -->
+        <button class="back-button" onclick="goBack()">Back</button>
+    </form>
+    <script src="script.js"></script>
+    
+    <p>&nbsp;</p>
+    <footer-line></footer-line>
+    <p>&nbsp;</p>
+    <copyright-text>Copyright &copy; 2023 Time-Lapse Camera Company. All rights reserved.</copyright-text>
+    <p>&nbsp;</p>
+    
+</body>
+</html>
