@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import logo from './logo.svg';
 import './App.css';
+
 
 function App() {
   const [temperature, setTemperature] = useState({ cpu: 0, room: 0 });
@@ -25,10 +25,13 @@ function App() {
   return (
     <div className="App">
       <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
+        {/*
+        import logo from './logo.svg'; 
+          <img src={logo} className="App-logo" alt="logo"/> 
+          */}
         <p>
-          CPU Temperature: {temperature.cpu} °C<br />
-          Room Temperature: {temperature.room} °C
+          Room Temperature: {temperature.room} °C<br />
+          CPU Temperature: {temperature.cpu} °C
         </p>
         <a
           className="App-link"
@@ -36,7 +39,7 @@ function App() {
           target="_blank"
           rel="noopener noreferrer"
         >
-          Learn React
+          {/*Learn React*/}
         </a>
       </header>
     </div>
