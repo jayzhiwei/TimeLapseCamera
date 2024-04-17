@@ -36,3 +36,35 @@
     transform: rotate(360deg);
   }
 }
+
+.online {
+  background-color: #4CAF50; /* Green for online */
+}
+
+.offline {
+  background-color: #f44336; /* Red for offline */
+}
+
+
+.offline-text {
+  color: #f44336; /* Red color indicating offline status */
+}
+
+.status-row {
+  display: flex;
+  align-items: center;  /* Align items vertically */
+  justify-content: space-between;  /* Space between label and value */
+  margin-bottom: 8px;  /* Margin for spacing between rows */
+}
+
+.bold-text {
+  font-weight: bold;
+  margin-right: 15px;  /* Space between label and value */
+}
+
+.status-indicator {
+  padding: 1px 5px;
+  color: white;
+  border-radius: 10px;
+  display: inline-block;
+}
