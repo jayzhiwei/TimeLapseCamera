@@ -6,11 +6,14 @@ import './App.css';
 function App() {
   const [temperature, setTemperature] = useState({ cpu: 0, room: 0 });
   const [isPiOnline, setIsPiOnline] = useState(false);  // State to track Raspberry Pi status
+  const streamUrl = 'http://192.168.1.188:3000/video_feed';
+  
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const { data } = await axios.get('http://192.168.1.118:3000/temperature');
+        const { data } = await axios.get('http://192.168.1.188:3000/temperature');
+        
         console.log("Fetched data:", data);  // Check fetched data
 
         // Format temperatures to two decimal places
@@ -27,8 +30,7 @@ function App() {
       }
     };
     
-    fetchData();
-    const intervalId = setInterval(fetchData, 1000); // Fetch every 1s
+    const intervalId = setInterval(fetchData, 2000); // Fetch every 2s
 
     return () => clearInterval(intervalId);
   }, []);
@@ -42,7 +44,11 @@ function App() {
         import logo from './logo.svg'; 
           <img src={logo} className="App-logo" alt="logo"/> 
           */}
-          
+
+        <h1>Raspberry Pi Camera Stream</h1>
+        
+        <img src={streamUrl} alt="Camera Off" className="video-stream" />
+
         <div className={`status-row ${!isPiOnline ? 'offline-text' : ''}`}>
           <span className="bold-text">Room Temperature:</span>
           <span>{temperature.room} °C</span>

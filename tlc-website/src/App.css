@@ -68,3 +68,14 @@
   border-radius: 10px;
   display: inline-block;
 }
+
+.video-stream {
+  width: 100%;  /* Default to full width */
+  height: auto;  /* Maintain the aspect ratio */
+}
+
+@media (min-width:900px) { /* When the viewport width is 800px or more */
+  .video-stream {
+    width: 70%;  /* Set width to 60% */
+  }
+}
