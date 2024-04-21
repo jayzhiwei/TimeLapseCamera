@@ -1,83 +1,22 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import './App.css';
-
+import Navbar from './Navbar'
+import About from './pages/About'
+import Home from './pages/Home'
+import RaspberryCam from './pages/RaspberryCam'
+import { Route, Routes } from 'react-router-dom'
 
 function App() {
-  const [temperature, setTemperature] = useState({ cpu: 0, room: 0 });
-  const [isPiOnline, setIsPiOnline] = useState(false);  // State to track Raspberry Pi status
-  const streamUrl = 'http://192.168.1.188:3000/video_feed';
-  
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const { data } = await axios.get('http://192.168.1.188:3000/temperature');
-        
-        console.log("Fetched data:", data);  // Check fetched data
-
-        // Format temperatures to two decimal places
-        const formattedCPUTemperature = parseFloat(data.cpu_temperature).toFixed(2);
-        const formattedRoomTemperature = parseFloat(data.room_temperature).toFixed(2);
-
-        setTemperature({ cpu: formattedCPUTemperature, room: formattedRoomTemperature });
-        setIsPiOnline(true);  // Set Raspberry Pi status to online
-
-        console.log("Updated state:", { cpu: data.cpu_temperature, room: data.room_temperature });  // Check actually setting
-      } catch (error) {
-        console.error('Error fetching data: ', error);
-        setIsPiOnline(false);  // Set Raspberry Pi status to offline on error
-      }
-    };
-    
-    const intervalId = setInterval(fetchData, 2000); // Fetch every 2s
-
-    return () => clearInterval(intervalId);
-  }, []);
-
-
-  
   return (
-    <div className="App">
-      <header className="App-header">
-        {/*
-        import logo from './logo.svg'; 
-          <img src={logo} className="App-logo" alt="logo"/> 
-          */}
-
-        <h1>Raspberry Pi Camera Stream</h1>
-        
-        <img src={streamUrl} alt="Camera Off" className="video-stream" />
-
-        <div className={`status-row ${!isPiOnline ? 'offline-text' : ''}`}>
-          <span className="bold-text">Room Temperature:</span>
-          <span>{temperature.room} °C</span>
-        </div>
-        
-        <div className={`status-row ${!isPiOnline ? 'offline-text' : ''}`}>
-          <span className="bold-text">CPU Temperature:</span>
-          <span>{temperature.cpu} °C</span>
-        </div>
-
-        <div className={`status-row ${!isPiOnline ? 'offline-text' : ''}`}>
-          <span className="bold-text">Raspberry Pi Status:</span>
-          <span className={`status-indicator ${isPiOnline ? 'online' : 'offline'}`}>
-            {isPiOnline ? 'Online' : 'Offline'}
-          </span>
-        </div>
-
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-
-          {/*Learn React*/}
-        </a>
-      </header>
-    </div>
-  );
+    <>
+      <Navbar />
+      <div className='container'>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/about' element={<About />} />
+          <Route path='/RaspberryCam' element={<RaspberryCam />} />
+        </Routes>
+      </div>
+    </>
+  )
 }
 
-export default App;
+export default App
