@@ -48,3 +48,25 @@ body {
 .nav li.active {
     background-color: #555;
 }
+
+@media (prefers-reduced-motion: no-preference) {
+    .App-logo {
+        animation: App-logo-spin infinite 20s linear;
+    }
+}
+  
+.App-logo { 
+    width: 50px; 
+    display: block; 
+    text-indent: -9999px;
+    }
+  
+@keyframes App-logo-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(0deg);
+    }
+  }
+

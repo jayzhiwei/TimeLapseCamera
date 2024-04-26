@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
 
-
 function App() {
   const [temperature, setTemperature] = useState({ cpu: 0, room: 0 });
   const [isPiOnline, setIsPiOnline] = useState(false);  // State to track Raspberry Pi status
@@ -39,14 +38,9 @@ function App() {
     return () => clearInterval(intervalId);
   }, []);
   
-  
   return (
     <div className="App">
       <header className="App-header">
-        {/*
-        import logo from './logo.svg'; 
-          <img src={logo} className="App-logo" alt="logo"/> 
-          */}
 
         <h1>Raspberry Pi Camera Stream</h1>
         
@@ -74,15 +68,6 @@ function App() {
           <span>{new Date(timestamp).toLocaleString()}</span>
         </div>
 
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-
-          {/*Learn React*/}
-        </a>
       </header>
     </div>
   );
