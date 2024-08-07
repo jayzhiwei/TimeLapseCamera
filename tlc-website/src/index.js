@@ -8,11 +8,13 @@ import { BrowserRouter } from 'react-router-dom';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-  <React.StrictMode>
+  //<React.StrictMode>
     <BrowserRouter>
       <App />
+      {/* if thumbnails not loading uncomment and comment again the below line*/}
+      {/* <iframe src="index.html" sandbox='allow-scripts'></iframe> */}
     </BrowserRouter>
-  </React.StrictMode>
+  //</React.StrictMode>
 );
 
 // If you want to start measuring performance in your app, pass a function

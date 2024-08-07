@@ -65,3 +65,53 @@
     width: 70%;  /* Set width to 60% */
   }
 }
+
+.App {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+ul {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 20px;
+  background-color: #333;
+  color: white;
+}
+
+.site-title {
+  display: flex;
+  align-items: center;
+}
+
+.site-title img {
+  height: 40px;
+  margin-right: 10px;
+}
+
+li {
+  margin-left: 20px;
+}
+
+.user-profile {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.user-image {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  border: 2px solid white;
+  object-fit: cover;
+}

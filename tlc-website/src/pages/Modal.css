@@ -1,0 +1,89 @@
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+  }
+  
+  .modal-content {
+    position: relative;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    max-width: 90%;
+    max-height: 90%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    box-sizing: border-box; /* Add this to ensure padding is considered within dimensions */
+  }
+  
+  .close-button {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: transparent;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+  }
+  
+  .modal-header {
+    text-align: center;
+    margin-bottom: 15px;
+  }
+  
+  .modal-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    margin-top: 15px;
+  }
+  
+  .modal-image {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 100%;
+    max-height: 100%;
+    overflow: auto; /* Ensure the image does not overflow */
+  }
+  
+  .modal-image img {
+    max-width: 100%;
+    max-height: 80vh; /* Constrain the image within the viewport height */
+    width: auto;
+    height: auto;
+    object-fit: contain; /* Ensures the image scales down to fit within the constraints */
+  }
+  
+  .image-counter {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #888;
+  }
+  
+  .prev-button,
+  .next-button {
+    background-color: #22e3f9;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+  }
+  
+  .prev-button:disabled,
+  .next-button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+  }
+  
