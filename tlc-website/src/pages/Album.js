@@ -5,7 +5,7 @@ import './Album.css'
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
+const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive';
 const FOLDER_NAME = 'album';
 
 const GoogleDrive = () => {
@@ -21,16 +21,13 @@ const GoogleDrive = () => {
       q: `mimeType='application/vnd.google-apps.folder' and '${parentId}' in parents`,
       fields: 'files(id, name)',
     }).then(response => {
-      console.log("API Response:", response);
       const files = response.result.files;
       if (files && files.length > 0) {
         setFolders(files);
       } else {
         setFolders([]);
-        console.log('No folders found.');
       }
     }).catch(err => {
-      console.error("Error during API request:", err);
       setError("Error fetching folders");
     });
   }, []);
@@ -40,17 +37,14 @@ const GoogleDrive = () => {
       q: `mimeType='application/vnd.google-apps.folder' and name='${folderName}'`,
       fields: 'files(id, name)',
     }).then(response => {
-      console.log("API Response:", response);
       const files = response.result.files;
       if (files && files.length > 0) {
         const folderId = files[0].id;
         listFolders(folderId);
       } else {
         setFolders([]);
-        console.log('No folder found with the specified name.');
       }
     }).catch(err => {
-      console.error("Error during API request:", err);
       setError("Error fetching folder by name");
     });
   }, [listFolders]);
@@ -73,26 +67,22 @@ const GoogleDrive = () => {
   useEffect(() => {
     const start = () => {
       if (!isInitialized.current) {
-        console.log("Initializing gapi client...");
         gapi.client.init({
           apiKey: API_KEY,
           clientId: CLIENT_ID,
           discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
           scope: SCOPES,
         }).then(() => {
-          console.log("gapi client initialized");
           const authInstance = gapi.auth2.getAuthInstance();
           if (authInstance) {
             authInstance.isSignedIn.listen(updateSigninStatus);
-            updateSigninStatus(authInstance.isSignedIn.get());
+            updateSigninStatus(authInstance.isSignedIn.get()); // Check if the user is already signed in
           } else {
-            console.error("Error: gapi.auth2.getAuthInstance() is null");
             setError("Error during initialization");
           }
           isInitialized.current = true;
           setInitStatus(true); // Update state to reflect initialization status
         }).catch(err => {
-          console.error("Error during gapi.client.init:", err);
           setError("Error during initialization");
         });
       }

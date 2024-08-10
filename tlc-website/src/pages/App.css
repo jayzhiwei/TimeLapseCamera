@@ -68,7 +68,6 @@
 
 .App {
   font-family: Arial, sans-serif;
-  padding: 20px;
 }
 
 ul {
@@ -85,4 +84,5 @@ ul {
   border-radius: 50%;
   border: 2px solid white;
   object-fit: cover;
+  margin-right: 10px;
 }

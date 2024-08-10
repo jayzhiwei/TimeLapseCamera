@@ -1,19 +1,19 @@
 import React, { useState, useEffect, useCallback, useContext } from 'react';
 import { gapi } from 'gapi-script';
-import GoogleDriveImages from './GoogleDriveImages';
 import { UserContext } from './UserContext';
 import './App.css';
+import './Home.css'
 
 const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
-const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly';
-
-console.log("CLIENT_ID from .env:", CLIENT_ID);
+const SCOPES = 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive';
 
 function Home() {
   const [isSignedIn, setIsSignedIn] = useState(false);
   const { userProfile, setUserProfile } = useContext(UserContext);
   const [error, setError] = useState(null);
+  const [usedStorage, setUsedStorage] = useState(0);
+  const [totalStorage, setTotalStorage] = useState(0);
 
   const handleAuthClick = () => {
     gapi.auth2.getAuthInstance().signIn().catch((error) => {
@@ -29,6 +29,19 @@ function Home() {
     });
   };
 
+  const fetchStorageInfo = useCallback(() => {
+    gapi.client.drive.about.get({
+      fields: 'storageQuota(limit, usage)',
+    }).then(response => {
+      const { limit, usage } = response.result.storageQuota;
+      setUsedStorage(parseInt(usage));
+      setTotalStorage(parseInt(limit));
+    }).catch((error) => {
+      console.error("Error fetching storage info:", error);
+      setError("Error fetching storage info: " + error.message);
+    });
+  }, []);
+
   const updateSigninStatus = useCallback((isSignedIn) => {
     setIsSignedIn(isSignedIn);
     if (isSignedIn) {
@@ -37,10 +50,11 @@ function Home() {
         name: profile.getName(),
         imageUrl: profile.getImageUrl(),
       });
+      fetchStorageInfo(); // Fetch storage info after signing in
     } else {
       setUserProfile({ name: '', imageUrl: '' });
     }
-  }, [setUserProfile]);
+  }, [setUserProfile, fetchStorageInfo]);
 
   useEffect(() => {
     const initClient = () => {
@@ -62,7 +76,18 @@ function Home() {
     gapi.load('client:auth2', initClient);
   }, [updateSigninStatus]);
 
-  const folderId = '1fL1JRBEfupZpc3LfqMuA0Okn0xK2ngtv';
+  const formatBytes = (bytes) => {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const calculateProgress = () => {
+    if (totalStorage === 0) return 0;
+    return (usedStorage / totalStorage) * 100;
+  };
 
   return (
     <div className="Home">
@@ -79,7 +104,13 @@ function Home() {
             <img src={userProfile.imageUrl} alt={userProfile.name} className="user-image" />
             <span>Welcome, {userProfile.name}</span>
           </div>
-          <GoogleDriveImages folderId={folderId} />
+          <div className="storage-info">
+            <h3>Google Drive Storage:</h3>
+            <div className="progress-bar-container">
+              <div className="progress-bar" style={{ width: `${calculateProgress()}%` }}></div>
+            </div>
+            <p>{`${formatBytes(usedStorage)} of ${formatBytes(totalStorage)} used`}</p>
+          </div>
         </div>
       )}
     </div>

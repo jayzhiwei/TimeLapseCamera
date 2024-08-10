@@ -21,7 +21,7 @@ function App() {
         apiKey: API_KEY,
         clientId: CLIENT_ID,
         discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-        scope: 'https://www.googleapis.com/auth/drive.readonly',
+        scope: 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive',
       }).then(() => {
         const authInstance = gapi.auth2.getAuthInstance();
         setIsSignedIn(authInstance.isSignedIn.get());

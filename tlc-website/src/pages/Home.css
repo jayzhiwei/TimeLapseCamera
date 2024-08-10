@@ -1,0 +1,44 @@
+.storage-info {
+    display: flex;
+    flex-direction: column;
+    align-items: baseline;
+
+    h3 {
+        margin: 0px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+        margin-left : 10px;
+        color: aliceblue;
+    }
+
+    p{
+        margin: 0px;
+        margin-left : 10px;
+        color: aliceblue;
+    }
+}
+ 
+.progress-bar-container {
+    width: 200px;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left : 10px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #3b82f6;
+    transition: width 0.s ease;
+}
+
+.Home{
+    background-color: #282c34;
+    height: 100vh;
+}
+
+
+h2{
+    margin-top:0;
+}

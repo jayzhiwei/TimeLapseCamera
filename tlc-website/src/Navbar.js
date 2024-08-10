@@ -17,7 +17,7 @@ export default function Navbar() {
                 <CustomLink to="/about">About</CustomLink>
                 {userProfile.imageUrl && (
                     <CustomLink to="/">
-                        <img src={userProfile.imageUrl} alt={userProfile.name} className="user-image" />
+                        <img src={userProfile.imageUrl} alt={userProfile.name} className="user-image-NV" />
                     </CustomLink>
                 )}
             </div>

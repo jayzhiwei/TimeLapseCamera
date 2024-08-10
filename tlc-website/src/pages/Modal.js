@@ -8,7 +8,7 @@ const Modal = ({ isOpen, onClose, children, onPrevious, onNext, imageName, curre
   return (
     <div className="imagePopup" onClick={onClose}>
       <div className="popupContent" onClick={(e) => e.stopPropagation()}>
-        <button className="close-button" onClick={onClose}>×</button>
+        <button className="close-button" onClick={onClose}>❌</button>
         <h3>{imageName}</h3>
         <div className="mainContent">
           <div className="holdImgContent">

@@ -1,19 +1,21 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import { gapi } from 'gapi-script';
 import Modal from './Modal'; // Import the Modal component
 import './GoogleDriveImages.css';
 
 const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
 
-const GoogleDriveImages = ({ folderId }) => {
+const GoogleDriveImages = ({ folderId, reloadTrigger }) => {
   const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(false); // Loading state
   const [selectedIndex, setSelectedIndex] = useState(null); // Track the index of the selected image
   const [selectedImageUrl, setSelectedImageUrl] = useState(null); // Store the selected image URL
-  const isFirstRender = useRef(true);
 
   useEffect(() => {
     const fetchImages = async () => {
+      setLoading(true);
+      setError(null);
       try {
         const response = await gapi.client.drive.files.list({
           q: `'${folderId}' in parents and mimeType contains 'image/'`,
@@ -22,17 +24,17 @@ const GoogleDriveImages = ({ folderId }) => {
         });
         setImages(response.result.files);
       } catch (error) {
-        setError('Error fetching images');
+        console.error('Error fetching images:', error);
+        setError('Error fetching images. Please try again later.');
+      } finally {
+        setLoading(false);
       }
     };
 
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      if (folderId) {
-        fetchImages();
-      }
+    if (folderId) {
+      fetchImages();
     }
-  }, [folderId]);
+  }, [folderId, reloadTrigger]); // Re-fetch images when folderId or reloadTrigger changes
 
   const handleThumbnailClick = (index) => {
     const imageId = images[index].id;
@@ -54,9 +56,10 @@ const GoogleDriveImages = ({ folderId }) => {
   };
 
   return (
-    <div className="image-gallery" >
-      {error && <div>{error}</div>}
-      {images.length > 0 ? (
+    <div className="image-gallery">
+      {loading && <div>Loading images...</div>}
+      {error && <div className="error-message">{error}</div>}
+      {!loading && images.length > 0 ? (
         images.map((image, index) => (
           <div key={image.id} className="image-item" onClick={() => handleThumbnailClick(index)}>
             <img 
@@ -69,7 +72,7 @@ const GoogleDriveImages = ({ folderId }) => {
           </div>
         ))
       ) : (
-        <div>No images found.</div>
+        !loading && <div>No images found.</div>
       )}
       {selectedImageUrl && (
         <Modal 
@@ -77,11 +80,11 @@ const GoogleDriveImages = ({ folderId }) => {
           onClose={() => setSelectedImageUrl(null)} 
           onPrevious={handlePrevious} 
           onNext={handleNext}
-          imageName={images[selectedIndex].name} // Pass the image name
+          imageName={images[selectedIndex]?.name} // Pass the image name safely
           currentIndex={selectedIndex} // Pass the current image index
           totalImages={images.length} // Pass the total number of images
         >
-          <img src={selectedImageUrl} alt={images[selectedIndex].name} />
+          <img src={selectedImageUrl} alt={images[selectedIndex]?.name} />
         </Modal>
       )}
     </div>
