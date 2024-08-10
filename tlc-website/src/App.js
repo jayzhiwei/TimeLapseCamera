@@ -35,7 +35,6 @@ function App() {
   
   return (
     <UserProvider>
-
         <Navbar />
         <div className='container'>
           <Routes>
@@ -46,7 +45,6 @@ function App() {
             <Route path='/folder/:id' element={<FolderContent isSignedIn={isSignedIn} />} />
           </Routes>
         </div>
-
     </UserProvider>
   );
 }

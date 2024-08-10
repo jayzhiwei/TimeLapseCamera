@@ -9,7 +9,7 @@ const GoogleDriveImages = ({ folderId }) => {
   const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
   const [selectedIndex, setSelectedIndex] = useState(null); // Track the index of the selected image
-  const [selectedImage, setSelectedImage] = useState(null); // Store the selected image URL
+  const [selectedImageUrl, setSelectedImageUrl] = useState(null); // Store the selected image URL
   const isFirstRender = useRef(true);
 
   useEffect(() => {
@@ -34,46 +34,35 @@ const GoogleDriveImages = ({ folderId }) => {
     }
   }, [folderId]);
 
-  const loadImage = async (index) => {
-    try {
-      const imageId = images[index].id;
-      const response = await fetch(`${process.env.REACT_APP_GOOGLE_REDIRECT_URI}/image/${imageId}`);
-      const blob = await response.blob();
-      const imageUrl = URL.createObjectURL(blob);
-      setSelectedImage(imageUrl);
-      setSelectedIndex(index);
-    } catch (error) {
-      setError('Error fetching the original image');
-    }
-  };
-
   const handleThumbnailClick = (index) => {
-    loadImage(index);
+    const imageId = images[index].id;
+    const imageUrl = `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}/image/${imageId}`;
+    setSelectedImageUrl(imageUrl);
+    setSelectedIndex(index);
   };
 
   const handlePrevious = () => {
     if (selectedIndex > 0) {
-      loadImage(selectedIndex - 1);
+      handleThumbnailClick(selectedIndex - 1);
     }
   };
 
   const handleNext = () => {
     if (selectedIndex < images.length - 1) {
-      loadImage(selectedIndex + 1);
+      handleThumbnailClick(selectedIndex + 1);
     }
   };
 
   return (
-    <div className="image-gallery">
+    <div className="image-gallery" >
       {error && <div>{error}</div>}
       {images.length > 0 ? (
         images.map((image, index) => (
-          <div key={image.id} className="image-item">
+          <div key={image.id} className="image-item" onClick={() => handleThumbnailClick(index)}>
             <img 
               src={image.thumbnailLink} 
               alt={image.name} 
               className="thumbnail" 
-              onClick={() => handleThumbnailClick(index)}
               onError={(e) => e.target.style.display = 'none'} 
             />
             <p>{image.name}</p>
@@ -82,17 +71,17 @@ const GoogleDriveImages = ({ folderId }) => {
       ) : (
         <div>No images found.</div>
       )}
-      {selectedImage && (
+      {selectedImageUrl && (
         <Modal 
-          isOpen={selectedImage !== null} 
-          onClose={() => setSelectedImage(null)} 
+          isOpen={selectedImageUrl !== null} 
+          onClose={() => setSelectedImageUrl(null)} 
           onPrevious={handlePrevious} 
           onNext={handleNext}
           imageName={images[selectedIndex].name} // Pass the image name
           currentIndex={selectedIndex} // Pass the current image index
           totalImages={images.length} // Pass the total number of images
         >
-          <img src={selectedImage} alt={images[selectedIndex].name} />
+          <img src={selectedImageUrl} alt={images[selectedIndex].name} />
         </Modal>
       )}
     </div>

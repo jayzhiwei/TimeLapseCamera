@@ -12,7 +12,7 @@ root.render(
     <BrowserRouter>
       <App />
       {/* if thumbnails not loading uncomment and comment again the below line*/}
-      {/* <iframe src="index.html" sandbox='allow-scripts'></iframe> */}
+      {/* <iframe src="index.html" sandbox='allow-scripts '></iframe> */}
     </BrowserRouter>
   //</React.StrictMode>
 );

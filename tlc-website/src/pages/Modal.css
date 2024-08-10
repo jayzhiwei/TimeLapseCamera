@@ -1,89 +1,107 @@
-.modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+.imagePopup {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+
+  .popupContent {
     display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1000;
-  }
-  
-  .modal-content {
-    position: relative;
-    background: white;
-    padding: 20px;
+    flex-direction: column;
+    background: rgb(255, 255, 255);
+    padding: 8px;
+    padding-top: 0px;
     border-radius: 8px;
-    max-width: 90%;
-    max-height: 90%;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    box-sizing: border-box; /* Add this to ensure padding is considered within dimensions */
-  }
-  
-  .close-button {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background: transparent;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-  }
-  
-  .modal-header {
-    text-align: center;
-    margin-bottom: 15px;
-  }
-  
-  .modal-navigation {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    margin-top: 15px;
-  }
-  
-  .modal-image {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
     max-width: 100%;
     max-height: 100%;
-    overflow: auto; /* Ensure the image does not overflow */
+    align-items: center;
+    box-sizing: border-box;
+    gap: 5;
+
+    .close-button {
+      max-height: fit-content;
+      background: transparent;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      align-self: flex-end;
+    }
+    
+    h3 {
+      height: fit-content;
+      margin: 0px;
+      align-self: center;
+    }
+
+    .mainContent {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-height: fit-content;
+      max-width: fit-content;
+      margin-top: 5px;
+      gap: 5px;
+      border-radius: 20px;
+      position: relative;
+
+      .prev-button,
+      .next-button {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-65%);
+        z-index: 1;
+        background-color: transparent;
+        color: #888;
+        border: none;
+        justify-content: center;
+        font-size: 30px;
+        cursor: pointer;
+        border-radius: 50%;
+        vertical-align: middle;
+
+        &:disabled {
+          color: transparent;
+          cursor: not-allowed;
+        }
+      }
+
+      .prev-button {
+        left: 10px;
+      }
+      
+      .next-button {
+        right: 10px;
+      }
+
+      .holdImgContent {
+        display: flex;
+        min-height: 50%;
+        max-height: 80%;
+        row-gap: 5px;
+        align-items: center;
+
+        img {
+          max-width: 90vw;
+          max-height:75vh;
+
+          object-fit: contain; /* Ensures the image scales down to fit within the constraints */
+          border-radius: 5px;
+          margin-left: 3px;
+          margin-right: 3px;
+        }
+      }
+
+      p {
+        font-size: 16px;
+        color: #888;
+        height: fit-content;
+        margin: 0%;
+      }
+    }
   }
-  
-  .modal-image img {
-    max-width: 100%;
-    max-height: 80vh; /* Constrain the image within the viewport height */
-    width: auto;
-    height: auto;
-    object-fit: contain; /* Ensures the image scales down to fit within the constraints */
-  }
-  
-  .image-counter {
-    margin-top: 10px;
-    font-size: 14px;
-    color: #888;
-  }
-  
-  .prev-button,
-  .next-button {
-    background-color: #22e3f9;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 4px;
-  }
-  
-  .prev-button:disabled,
-  .next-button:disabled {
-    background-color: #ccc;
-    cursor: not-allowed;
-  }
-  
+}

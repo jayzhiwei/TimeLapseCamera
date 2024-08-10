@@ -14,26 +14,25 @@ function FolderContent({ isSignedIn }) {
   const [folderName, setFolderName] = useState(initialFolderName);
 
   useEffect(() => {
-    console.log('Location state:', location.state); // Log the location state
+    console.log('Location state:', location.state);
+
+    const fetchFolderName = async (folderId) => {
+      try {
+        console.log(`Fetching folder name for folder ID: ${folderId}`);
+        const response = await gapi.client.drive.files.get({
+          fileId: folderId,
+          fields: 'name',
+          key: API_KEY,
+        });
+        console.log('API response:', response);
+        setFolderName(response.result.name);
+      } catch (error) {
+        console.error('Error fetching folder name:', error);
+        setFolderName('Unknown Folder'); // Provide a fallback name in case of error
+      }
+    };
 
     if (!folderName && isSignedIn && id) {
-      console.log('Folder name not found in link state, fetching from API...');
-
-      const fetchFolderName = async (folderId) => {
-        try {
-          console.log(`Fetching folder name for folder ID: ${folderId}`);
-          const response = await gapi.client.drive.files.get({
-            fileId: folderId,
-            fields: 'name',
-            key: API_KEY,
-          });
-          console.log('API response:', response);
-          setFolderName(response.result.name);
-        } catch (error) {
-          console.error('Error fetching folder name:', error);
-        }
-      };
-
       fetchFolderName(id);
     }
   }, [id, isSignedIn, folderName, location.state]);
