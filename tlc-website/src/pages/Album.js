@@ -93,7 +93,7 @@ const GoogleDrive = () => {
   }, [updateSigninStatus, initStatus]);
 
   return (
-    <div className="google-drive">
+    <div className="App-background">
       {isSignedIn && (
         <div className="user-info">
           <img src={userProfile.imageUrl} alt={userProfile.name} className="user-image" />

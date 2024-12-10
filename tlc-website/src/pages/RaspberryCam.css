@@ -1,0 +1,52 @@
+.RaspberryCam{
+  online {
+    background-color: #4CAF50; /* Green for online */
+    align-items: center;
+  }
+  
+  .offline {
+    background-color: #f44336; /* Red for offline */
+  }
+  
+  .offline-text {
+    color: #f44336; /* Red color indicating offline status */
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;  /* Align items vertically */
+    align-self: center;
+    margin-bottom: 8px;  /* Margin for spacing between rows */
+
+  }
+  
+  .bold-text {
+    font-weight: bold;
+    margin-right: 15px;  /* Space between label and value */
+    
+  }
+  
+  .status-indicator {
+    padding: 1px 5px;
+    color: white;
+    border-radius: 10px;
+    display: inline-block;
+    align-self: center;
+  }
+  
+  .video-stream {
+    display: flex;
+    flex-direction: column;
+    width: 100%;  /* Default to full width */
+    height: auto;  /* Maintain the aspect ratio */
+    align-self: center;
+    align-items: center;
+  }
+  
+  @media (min-width:900px) { /* When the viewport width is 800px or more */
+    .video-stream {
+      width: 70%;  /* Set width to 60% */
+      
+    }
+  }
+}

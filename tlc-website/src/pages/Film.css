@@ -1,0 +1,43 @@
+.video-gallery {
+    display: grid;
+    gap: 20px;
+    padding: 20px;
+    align-items: center;
+    align-content: center;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    }
+  
+.video-item {
+    width: 100%;
+    max-width: 320px;
+    }
+
+.video-player {
+    width: 100%;
+    height: auto;
+    max-width: 100%;
+    border-radius: 8px;
+    background-color: #000;
+    }
+
+.error-message {
+    color: red;
+    font-size: 16px;
+    margin: 20px;
+    }
+
+p{
+    margin: 0;
+}
+
+.download-link {
+    display: inline-block;
+    margin-top: 10px;
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+  }
+  
+  .download-link:hover {
+    text-decoration: underline;
+  }

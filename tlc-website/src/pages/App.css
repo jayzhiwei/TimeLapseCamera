@@ -8,63 +8,25 @@
   text-indent: -9999px;
   }
 
-.App-header {
+.App-background {
   background-color: #282c34;
-  min-height: 100vh;
   display: flex;
+  height: 100%;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  /* align-items: center;
+  justify-content: center; */
   color: white;
+  min-height: 94.94vh;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
 }
 
 .App-link {
   color: #61dafb;
 }
 
-.online {
-  background-color: #4CAF50; /* Green for online */
-}
-
-.offline {
-  background-color: #f44336; /* Red for offline */
-}
-
-
-.offline-text {
-  color: #f44336; /* Red color indicating offline status */
-}
-
-.status-row {
-  display: flex;
-  align-items: center;  /* Align items vertically */
-  justify-content: space-between;  /* Space between label and value */
-  margin-bottom: 8px;  /* Margin for spacing between rows */
-}
-
-.bold-text {
-  font-weight: bold;
-  margin-right: 15px;  /* Space between label and value */
-}
-
-.status-indicator {
-  padding: 1px 5px;
-  color: white;
-  border-radius: 10px;
-  display: inline-block;
-}
-
-.video-stream {
-  width: 100%;  /* Default to full width */
-  height: auto;  /* Maintain the aspect ratio */
-}
-
-@media (min-width:900px) { /* When the viewport width is 800px or more */
-  .video-stream {
-    width: 70%;  /* Set width to 60% */
-  }
-}
 
 .App {
   font-family: Arial, sans-serif;

@@ -20,12 +20,51 @@
     align-items: center;
     color: inherit; /* Inherit color from parent */
     text-decoration: none;
-    padding: 0 1rem; /* Adjust padding to space out links */
+    padding: 10px; /* Adjust padding to space out links */
     height: 45px; /* Ensure links take up full navbar height */
     transition: background-color 0.3s ease;
     box-sizing: border-box; /* Ensure padding doesn't affect height */
-    
 }
+
+.nav i{
+    padding-right: 5px;
+}
+
+.nav-links a i {
+    margin-right: 0;
+    font-size: 20px;
+}
+
+@media (max-width: 494px) {
+    .nav-links{
+        display: flex;
+
+    }
+
+    .nav-links a span {
+        display: none;
+    }
+
+    .nav i{
+        padding-right: 0px;
+    }
+
+    .nav-links a i {
+        font-size: 30px;
+    }
+
+    .nav-links a {
+        justify-content: center;
+        padding: 8px;
+    }
+}
+
+.user-image-NV {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+}
+
 
 .site-title img {
     height: 40px;

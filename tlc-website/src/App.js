@@ -1,50 +1,63 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useContext } from 'react'; // Import useContext here
 import { Route, Routes } from 'react-router-dom';
 import Navbar from './Navbar';
 import About from './pages/About';
 import Albums from './pages/Album';
+import Film from './pages/Film';
 import Home from './pages/Home';
 import RaspberryCam from './pages/RaspberryCam';
 import FolderContent from './pages/FolderContent';
-import { UserProvider } from './pages/UserContext';
-import { gapi } from 'gapi-script';
+import { UserProvider, UserContext } from './pages/UserContext'; // Import UserContext here
+import { auth } from './firebase/firebase';
+import { onAuthStateChanged } from 'firebase/auth';
 
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-const API_KEY = process.env.REACT_APP_GOOGLE_API_KEY;
+const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=d30677b9-e6f4-459d-bd54-070f5f3002cc';
+
+function AppContent() {
+  const { setUserProfile } = useContext(UserContext); // useContext is now defined
+  const [isSignedIn, setIsSignedIn] = useState(false);
+
+  useEffect(() => {
+    // Check Firebase authentication state
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUserProfile({
+          uid: user.uid,
+          name: user.displayName || user.email,
+          imageUrl: user.photoURL || defaultProfileImage,
+        });
+        setIsSignedIn(true);
+      } else {
+        setIsSignedIn(false);
+        setUserProfile({ uid: null, name: '', imageUrl: '' });
+      }
+    });
+
+    // Clean up the listener on unmount
+    return () => unsubscribe();
+  }, [setUserProfile]);
+
+  return (
+    <>
+      <Navbar />
+      <div className='container'>
+        <Routes>
+          <Route path='/' element={<Home />} />
+          <Route path='/googledrivealbum' element={<Albums />} />
+          <Route path='/Film' element={<Film />} />
+          <Route path='/about' element={<About />} />
+          <Route path='/raspberrycam' element={<RaspberryCam />} />
+          <Route path='/folder/:id' element={<FolderContent isSignedIn={isSignedIn} />} />
+        </Routes>
+      </div>
+    </>
+  );
+}
 
 function App() {
-  const [isSignedIn, setIsSignedIn] = useState(false);
-  
-  useEffect(() => {
-    const start = () => {
-      gapi.client.init({
-        apiKey: API_KEY,
-        clientId: CLIENT_ID,
-        discoveryDocs: ['https://www.googleapis.com/discovery/v1/apis/drive/v3/rest'],
-        scope: 'https://www.googleapis.com/auth/drive.metadata.readonly https://www.googleapis.com/auth/drive',
-      }).then(() => {
-        const authInstance = gapi.auth2.getAuthInstance();
-        setIsSignedIn(authInstance.isSignedIn.get());
-        authInstance.isSignedIn.listen(setIsSignedIn);
-      }).catch(err => {
-        console.error("Error initializing GAPI client:", err);
-      });
-    };
-    gapi.load('client:auth2', start);
-  }, []);
-  
   return (
     <UserProvider>
-        <Navbar />
-        <div className='container'>
-          <Routes>
-            <Route path='/' element={<Home />} />
-            <Route path='/googledrivealbum' element={<Albums />} />
-            <Route path='/about' element={<About />} />
-            <Route path='/raspberrycam' element={<RaspberryCam />} />
-            <Route path='/folder/:id' element={<FolderContent isSignedIn={isSignedIn} />} />
-          </Routes>
-        </div>
+      <AppContent />
     </UserProvider>
   );
 }

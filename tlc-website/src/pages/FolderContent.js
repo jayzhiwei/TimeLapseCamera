@@ -85,7 +85,7 @@ function FolderContent() {
   };
 
   return (
-    <div className="FolderContent">
+    <div className="App-background">
       <button onClick={goBack}>Previous</button>
       <button onClick={refreshData}>Refresh</button> {/* Refresh button */}
       <h2>Folder Name: {folderName}</h2>

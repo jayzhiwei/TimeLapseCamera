@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import './App.css';
+import './RaspberryCam.css';
 
-function App() {
+function RaspberryCam() {
   const [temperature, setTemperature] = useState({ cpu: 0, room: 0 });
   const [isPiOnline, setIsPiOnline] = useState(false);  // State to track Raspberry Pi status
   const [timestamp, setTimestamp] = useState(Date.now());
@@ -39,12 +40,14 @@ function App() {
   }, []);
   
   return (
-    <div className="App">
-      <header className="App-header">
+    <div className="RaspberryCam">
+      <header className="App-background">
 
         <h1>Raspberry Pi Camera Stream</h1>
         
-        <img src={streamUrl} alt="Camera Off" className="video-stream" />
+        <img className="video-stream"
+          src={streamUrl} 
+          alt="Camera Off"  />
 
         <div className={`status-row ${!isPiOnline ? 'offline-text' : ''}`}>
           <span className="bold-text">Room Temperature:</span>
@@ -73,4 +76,4 @@ function App() {
   );
 }
 
-export default App;
+export default RaspberryCam;
