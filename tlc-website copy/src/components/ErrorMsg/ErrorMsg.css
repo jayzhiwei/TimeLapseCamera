@@ -1,0 +1,21 @@
+.App-error-msg{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: rgb(235, 235, 235);
+    margin: 10px;
+    min-width: fit-content;
+    min-height: fit-content;
+    background-color: #3e4042;
+    border-radius: 20px;
+    padding: 10px;
+    opacity: 70%;
+    font-size: 14px;
+}
+
+.App-error-icon{
+    font-size: 20px;
+    color: #f44336;
+    margin-right: 8px;
+}

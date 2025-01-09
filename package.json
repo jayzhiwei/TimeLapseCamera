@@ -1,5 +1,6 @@
 {
   "dependencies": {
+    "countries-and-timezones": "^3.7.2",
     "moment": "^2.30.1",
     "react-google-drive-picker": "^1.2.2"
   }

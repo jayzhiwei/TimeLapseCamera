@@ -98,7 +98,7 @@ function Home() {
   const handleUploadProfilePicture = () => {
     if (!selectedFile) return;
 
-    const storageRef = ref(storage, `profile_pictures/${auth.currentUser.uid}-${selectedFile.name}`);
+    const storageRef = ref(storage, `profile_pictures/${auth.currentUser.uid}`);
     const uploadTask = uploadBytesResumable(storageRef, selectedFile);
 
     uploadTask.on('state_changed', 
