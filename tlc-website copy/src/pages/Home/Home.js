@@ -12,7 +12,7 @@ const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelap
 
 function Home() {
   const [isSignedIn, setIsSignedIn] = useState(false);
-  const { userProfile, setUserProfile } = useContext(UserContext);
+  const {userProfile, setUserProfile } = useContext(UserContext);
   const [error, setError] = useState(null);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -68,22 +68,27 @@ function Home() {
       .then(async(result) => {
         const user = result.user;
         setUserProfile({
-          name: user.displayName || user.email,
+          name: user.displayName,
           imageUrl: user.photoURL || defaultProfileImage, // Use default if no profile picture
         });
         setIsSignedIn(true);
         setError(null);
-
         // Check if user document exists, if not create it
         const userDocRef = doc(db, "users", user.uid);
         const userDocSnap = await getDoc(userDocRef);
         if (!userDocSnap.exists()) {
           await setDoc(userDocRef, {
             email: user.email,
-            name: user.displayName || "newUser",
+            name: user.displayName || "New User",
             createdAt: new Date(),
             pairedRaspberrys: [], // Example field, you can add more
           });
+
+          setUserProfile({
+            name: user.displayName,
+            imageUrl: user.photoURL || defaultProfileImage,
+          });
+
           console.log("New user document created.");
         }
       })
@@ -100,24 +105,17 @@ function Home() {
         const user = result.user;
         if (user.emailVerified) {
           setUserProfile({
-            name: user.displayName || user.email,
+            name: user.displayName,
             imageUrl: user.photoURL || defaultProfileImage, // Use default if no profile picture
           });
           setIsSignedIn(true);
           setError(null);
-          
-          // Check if user document exists, if not create it
-          const userDocRef = doc(db, "users", user.uid);
-          const userDocSnap = await getDoc(userDocRef);
-          if (!userDocSnap.exists()) {
-            await setDoc(userDocRef, {
-              email: user.email,
-              name: user.displayName || "newUser",
-              createdAt: new Date(),
-              pairedRaspberrys: [], // Example field, you can add more
-            });
-            console.log("New user document created.");
-          }
+
+          setUserProfile({
+            name: user.displayName,
+            imageUrl: user.photoURL || defaultProfileImage,
+          });
+
         } else {
           setError("Please verify your email before signing in.");
         }
@@ -131,17 +129,19 @@ function Home() {
   // Function to poll for email verification status
   const pollEmailVerification = (user) => {
     const interval = setInterval(() => {
-      user.reload().then(() => {
+      user.reload().then(async() => {
         if (user.emailVerified) {
           clearInterval(interval); // Stop polling once verified
+          const updatedUser = auth.currentUser;
           // Automatically log the user in
           setUserProfile({
-            name: user.displayName || user.email,
-            imageUrl: user.photoURL || defaultProfileImage,
+            name: updatedUser.displayName  || "New User",
+            imageUrl: updatedUser.photoURL || defaultProfileImage,
           });
           setIsSignedIn(true);
           setError(null);
           console.log("User email verified, logged in automatically.");
+          
         }
       }).catch((error) => {
         console.error("Error reloading user:", error);
@@ -155,25 +155,43 @@ function Home() {
       setError("Passwords do not match.");
       return;
     }
-
     createUserWithEmailAndPassword(auth, email, password)
-      .then((result) => {
+      .then(async(result) => {
         const user = result.user;
-        sendEmailVerification(user)
-          .then(() => {
-            setError("Verification email sent. Please check your inbox.");
-            pollEmailVerification(user);
-          })
-          .catch((error) => {
-            console.error("Error sending verification email:", error);
-            setError("Error sending verification email: " + error.message);
+        // Check if user document exists, if not create it
+        const userDocRef = doc(db, "users", user.uid);
+        const userDocSnap = await getDoc(userDocRef);
+        if (!userDocSnap.exists()) {
+          await setDoc(userDocRef, {
+            email: user.email,
+            name: user.displayName || "New User",
+            createdAt: new Date(),
+            pairedRaspberrys: [], // Example field, you can add more
           });
-        setIsSignedIn(false); // Don't sign in immediately; wait for email verification
-      })
-      .catch((error) => {
-        console.error("Error signing up:", error);
-        setError("Error signing up: " + error.message);
-      });
+
+          // setUserProfile({
+          //   name: user.displayName,
+          //   imageUrl: user.photoURL || defaultProfileImage,
+          // });
+
+          console.log("New user document created.");
+        }
+
+      sendEmailVerification(user)
+        .then(() => {
+          setError("Verification email sent. Please check your inbox.");
+          pollEmailVerification(user);
+        })
+        .catch((error) => {
+          console.error("Error sending verification email:", error);
+          setError("Error sending verification email: " + error.message);
+        });
+      setIsSignedIn(false); // Don't sign in immediately; wait for email verification
+    })
+    .catch((error) => {
+      console.error("Error signing up:", error);
+      setError("Error signing up: " + error.message);
+    });
   };
 
   // Handle Profile Picture Change
@@ -205,7 +223,7 @@ function Home() {
             photoURL: downloadURL,
           }).then(() => {
             setUserProfile({
-              name: auth.currentUser.displayName || auth.currentUser.email,
+              name: auth.currentUser.displayName,
               imageUrl: downloadURL,
             });
             setError(null);
@@ -252,13 +270,13 @@ function Home() {
             if (userDocSnap.exists()) {
               const userData = userDocSnap.data();
               setUserProfile({
-                name: userData.name || user.email,
+                name: userData.name || user.displayName || "New User",
                 imageUrl: user.photoURL || defaultProfileImage, // Use default if no profile picture
               });
             } else {
               // If the user document doesn't exist, fallback to default
               setUserProfile({
-                name: user.email,
+                name: user.displayName || "New User",
                 imageUrl: user.photoURL || defaultProfileImage,
               });
               console.error("User document does not exist in Firestore.");
