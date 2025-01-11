@@ -16,7 +16,8 @@ export default function Navbar() {
             <div className="nav-links">
                 <CustomLink to="/album"><i className="fas fa-images"></i><span>Albums</span></CustomLink>
                 <CustomLink to="/film"><i className="fas fa-film"></i><span>Films</span></CustomLink>
-                <CustomLink to="/myDevices"><i className="fas fa-video"></i><span>My Devices</span></CustomLink>
+                <CustomLink to="/myDevices"><i className="fas fa-video"></i><span>Devices</span></CustomLink>
+                <CustomLink to="/PairDevices"><i className="fas fa-link"></i><span>Pair</span></CustomLink>
                 <CustomLink to="/about"><i className="fas fa-info-circle"></i><span>About</span></CustomLink>
                 {userProfile.imageUrl && (
                     <CustomLink to="/">

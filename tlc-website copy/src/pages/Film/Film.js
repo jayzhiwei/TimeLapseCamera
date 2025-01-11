@@ -39,7 +39,7 @@ function Film() {
         id: video.id,
         name: video.name,
         mimeType: video.mimeType,
-        url: `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}/video/${video.id}.mp4` // Ensure this points to your server URL
+        url: `${process.env.REACT_APP_GOOGLE_REDIRECT_URI}/video/${video.id}.mp4` // Ensure this points is server URL
       }));
       setVideos(videoData);
       setLoading(false);

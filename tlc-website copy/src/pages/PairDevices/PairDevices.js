@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { collection, query, where, getDocs, getDoc , doc, updateDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
-import { db, auth } from "../../firebase/firebase"; // Update with your Firebase configuration paths
+import { auth, db } from "../../firebase/firebase"; // Update with your Firebase configuration paths
 import '../../App.css';
 import "./PairDevices.css";
 
@@ -74,16 +74,28 @@ const handlePair = async (raspberryId) => {
             UIDlastModified: serverTimestamp(),
         });
 
+        const formatDateTime = (date) => {
+            const year = date.getFullYear();
+            const month = (date.getMonth() + 1).toString().padStart(2, "0");
+            const day = date.getDate().toString().padStart(2, "0");
+            const hours = date.getHours().toString().padStart(2, "0");
+            const minutes = date.getMinutes().toString().padStart(2, "0");
+            const seconds = date.getSeconds().toString().padStart(2, "0");
+            return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+        };
+
         // Create initial TimeLapseCase template
         const now = new Date();
         const caseStart = new Date(now.getTime() + 30 * 1000); // 30 seconds from now
         const caseEnd = new Date(caseStart.getTime() + 8 * 60 * 1000); // 8 minutes later
         const timelapseRef = doc(db, `raspberrys/${raspberryId}/TimeLapseCase/timelapseTemplate`);
+        
         await setDoc(timelapseRef, {
+            name:"Template Case",
             status: "standby",
             captureTime: "12:00:00_18:00:00",
-            caseStart: caseStart.toISOString(),
-            caseEnd: caseEnd.toISOString(),
+            caseStart: formatDateTime(caseStart),
+            caseEnd: formatDateTime(caseEnd),
             timeUnit: "sec",
             intervalValue: 20,
             resolution: "720p",
@@ -214,16 +226,15 @@ const handleSearch = async () => {
             placeholder="Enter SSID"
         />
 
-        <label htmlFor="country">Country:</label>
+        <label htmlFor="country">Country (Raspberry currently at):</label>
         <select id="country" value={country} onChange={(e) => setCountry(e.target.value)}>
             <option value="">Select Country</option>
-            <option value="SG">Singapore</option>
-            <option value="UK">United Kingdom</option>
-            <option value="JP">Japan</option>
-            {/* Add more country options */}
+            <option value="SG">(SG) Singapore</option>
+            <option value="UK">(UK) United Kingdom</option>
+            <option value="JP">(JP) Japan</option>
         </select>
 
-        <label htmlFor="date">Date (YYYY-MM-DD):</label>
+        <label htmlFor="date">Date (Rapsberry 1st connected to WiFi):</label>
         <input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
 
         <button onClick={handleSearch} disabled={loading}>
@@ -267,7 +278,7 @@ const handleSearch = async () => {
                     id={`name-${raspberry.ID}`}
                     type="text"
                     placeholder="Enter a name"
-                    value={raspberryName}
+                    value={raspberryName[raspberry.ID]}
                     onChange={(e) => setRaspberryName(e.target.value)}
                 />
                 <button onClick={() => {

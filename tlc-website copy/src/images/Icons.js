@@ -3,6 +3,7 @@ import { TbAlertTriangleFilled } from "react-icons/tb";
 import { FaWifi } from "react-icons/fa";
 import { IoBriefcaseOutline } from "react-icons/io5";
 import { MdOutlineWork } from "react-icons/md";
+import { MdEdit } from "react-icons/md";
 
 export {
     FaCircle,   // Fill circle "<FaCircle />"
@@ -10,4 +11,5 @@ export {
     FaWifi, // Wifi "<FaWifi />"
     IoBriefcaseOutline, // Job (Case) "<IoBriefcaseOutline />"
     MdOutlineWork, // Job (Case) "<MdOutlineWork />"
+    MdEdit, // Edit "<MdEdit />"
 }

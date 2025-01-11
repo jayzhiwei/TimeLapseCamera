@@ -26,14 +26,12 @@ function About() {
                     Your browser does not support the video tag.
                 </video>
                 {error && <div className="error-message">{error}</div>}
-                
                 <img 
                     src="https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/testIMG%2F3ndPhoto.jpg?alt=media&token=6aa1d756-79fe-4821-8b89-2bc787a6275a" 
                     alt=""
                     width="50%"
                     height="auto"
                 />
-                
                 <p>About</p>
             </header>
         </div>
