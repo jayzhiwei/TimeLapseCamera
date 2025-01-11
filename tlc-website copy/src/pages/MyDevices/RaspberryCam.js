@@ -12,7 +12,8 @@ import './RaspberryCam.css';
 import eth0Icon from "../../images/ethernet.png";
 import roomTemp from "../../images/RTemp.svg";
 import cpuTemp from "../../images/CPUTemp.svg";
-import { FaCircle, FaWifi, IoBriefcaseOutline, MdOutlineWork } from "../../images/Icons";
+import { FaCircle, FaWifi, MdOutlineWork } from "../../images/Icons";
+// import { FaCircle, FaWifi, IoBriefcaseOutline, MdOutlineWork } from "../../images/Icons";
 
 function RaspberryCam() {
   const [userId, setUserId] = useState(null);
