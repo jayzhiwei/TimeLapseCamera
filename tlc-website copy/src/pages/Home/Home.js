@@ -81,7 +81,6 @@ function Home() {
             email: user.email,
             name: user.displayName || "New User",
             createdAt: new Date(),
-            pairedRaspberrys: [], // Example field, you can add more
           });
 
           setUserProfile({
@@ -166,7 +165,6 @@ function Home() {
             email: user.email,
             name: user.displayName || "New User",
             createdAt: new Date(),
-            pairedRaspberrys: [], // Example field, you can add more
           });
 
           // setUserProfile({
