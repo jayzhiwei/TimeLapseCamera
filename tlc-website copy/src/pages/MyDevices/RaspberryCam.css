@@ -5,7 +5,7 @@
   border-radius: 15px;
   gap: 20px;
   padding: 15px;
-
+  
   .deviceCard{
     display: flex;
     flex-direction: column;
@@ -19,8 +19,15 @@
     opacity: 75%;
     border-radius: 20px;
     text-align: left;
+    transition: transform 0.3s ease;
+  }
+  
+  .deviceCard:hover {
+    transform: scale(1.05);
   }
 }
+
+
 
 .title{
   display: flex;

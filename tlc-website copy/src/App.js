@@ -7,7 +7,7 @@ import Film from './pages/Film/Film';
 import Home from './pages/Home/Home';
 import RaspberryCam from './pages/MyDevices/RaspberryCam';
 import PairDevices from './pages/PairDevices/PairDevices';
-import CreateTimeLapseCase from './pages/CreateTimeLapseCase/CreateTimeLapseCase';
+import RaspiDetail from './pages/RaspiDetail/RaspiDetail';
 import FolderContent from './pages/FolderContent';
 import { UserProvider, UserContext } from './components/UserContext'; // Import UserContext here
 import { auth } from './firebase/firebase';
@@ -50,7 +50,7 @@ function AppContent() {
           <Route path='/about' element={<About />} />
           <Route path='/myDevices' element={<RaspberryCam />} />
           <Route path='/PairDevices' element={<PairDevices />} />
-          <Route path='/CreateTimeLapseCase' element={<CreateTimeLapseCase/>} />
+          <Route path='/CreateTimeLapseCase' element={<RaspiDetail/>} />
           <Route path='/folder/:id' element={<FolderContent isSignedIn={isSignedIn} />} />
         </Routes>
       </div>

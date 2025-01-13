@@ -98,17 +98,20 @@ h2{
   .Register-error-message span {
     font-size: 14px;
     color: green; /* Green for match */
+    font-weight: bold;
   }
   
   .Register-error-message span.error {
     color: red; /* Red for no match */
+    font-weight: bold
   }
   
   .page-error-message {
     color: red;
     font-size: 14px;
     margin-top: -6px;
-    text-align: center; /* Optional for centring */
+    display:flex;
+    text-align: center;
   }
   
   .user-info{

@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { collection, query, where, getDocs } from "firebase/firestore";
-import { auth, db } from "../../firebase/firebase"; // Update your Firebase paths
+import { auth, db } from "../../firebase/firebase.js"; // Update your Firebase paths
 import "../../App.css";
-import "./CreateTimeLapseCase.css";
-
+import "./RaspiDetail.css";
+import { useLocation } from 'react-router-dom';
 import { MdEdit } from "../../images/Icons.js"
 
-function CreateTimeLapseCase() {
+function RaspiDetail() {
     const [currentUser, setCurrentUser] = useState(null);
     const [raspberryPis, setRaspberryPis] = useState([]);
     const [selectedDevice, setSelectedDevice] = useState(null);
@@ -16,6 +16,9 @@ function CreateTimeLapseCase() {
     const [error, setError] = useState("");
     const [editingCase, setEditingCase] = useState(null); // Stores the selected case for editing
     const [showEditPage, setShowEditPage] = useState(false); // Controls the popup visibility
+    const location = useLocation();
+    const serial = location.state?.serial;
+    console.log(location)
 
 
     // Track the logged-in user
@@ -95,6 +98,12 @@ const formatDate = (dateString) => {
 return (
     <div className="App-background">
         <h1>My Raspberry Pi Devices</h1>
+        
+        {serial ? (
+        <p>Serial Number: {serial}</p>
+        ):(
+            <p>No serial number provided</p>
+        )}
 
         {error && <p className="error">{error}</p>}
         {loading && <p>Loading...</p>}
@@ -162,4 +171,4 @@ return (
   );
 }
 
-export default CreateTimeLapseCase;
+export default RaspiDetail;

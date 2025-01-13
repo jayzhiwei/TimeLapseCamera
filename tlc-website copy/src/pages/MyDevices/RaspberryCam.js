@@ -7,6 +7,7 @@ import { formatFirestoreTimestamp } from '../../functions/formatDate';
 import ErrorMsg from '../../components/ErrorMsg/ErrorMsg';
 import '../../App.css';
 import './RaspberryCam.css';
+import { Link } from "react-router-dom";
 
 // React Icon Libraries
 import eth0Icon from "../../images/ethernet.png";
@@ -42,6 +43,7 @@ function RaspberryCam() {
       
     }
     // console.log(pairedPis[1].timeLapseCase.data.status);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
   // console.log(pairedPis);
 
@@ -222,7 +224,7 @@ function RaspberryCam() {
     });
 
     // Periodic Interval to Check Offline Status
-    const interval = setInterval(() => {
+    setInterval(() => {
       setPairedPis((prevPairedPis) =>
         prevPairedPis.map((pi) => {
           const currentTime = Date.now() / 1000;
@@ -248,10 +250,15 @@ function RaspberryCam() {
 
         <div className='devices'>
           {pairedPis.map((pi) => (
-            <div 
-              key={pi.serial}
-              className='deviceCard'>
-              {/* Title: Devices Name and Status */}
+            
+            <Link
+            to="/CreateTimeLapseCase"
+            state={{ serial: pi.serial }} // Pass the state directly
+            key={pi.serial}
+            className="deviceCard"
+            style={{ textDecoration: "none", color: "inherit" }}
+            >
+
               <div className='title'>
                 <h3>{pi.data.NAME}</h3>
                 <div className='status'>
@@ -289,11 +296,11 @@ function RaspberryCam() {
 
               <div className='temperature'>
                 <div className='roomTemp'>
-                  <img src={roomTemp} className='App-logo'/>
+                  <img src={roomTemp} className='App-logo' alt='Surronding Temperature'/>
                   <span>{pi.temperatureLog?._document?.data?.value?.mapValue?.fields?.Room?.doubleValue ?? "N/A"} &deg;C</span>
                 </div>
                 <div className='cpuTemp'>
-                  <img src={cpuTemp} className='App-logo'/>
+                  <img src={cpuTemp} className='App-logo' alt='CPU Temperature'/>
                   <span>{pi.temperatureLog?._document?.data?.value?.mapValue?.fields?.CPU?.doubleValue  ?? "N/A"} &deg;C</span>
                 </div>
               </div>
@@ -302,7 +309,7 @@ function RaspberryCam() {
                 <div className='connectionTitle'>
                   {pi.network.data?.Interface === "ethernet" ? (
                     // If device connected by lan cable
-                    <img src={eth0Icon} className='App-logo'/>
+                    <img src={eth0Icon} className='App-logo' alt=''/>
                   ):(
                     // If device connected by WiFi
                     <FaWifi />
@@ -316,9 +323,9 @@ function RaspberryCam() {
                   {formatFirestoreTimestamp(pi.network.data.timeAdd.seconds)}
                 </p>
               </div>
-            </div>
-            ))
-          }
+            {/* </div> */}
+            </Link>
+          ))}
         </div>
       </header>
     </div>

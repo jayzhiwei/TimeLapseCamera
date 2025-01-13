@@ -13,14 +13,7 @@
     color: #8d99ae;
     margin-bottom: 20px;
   }
-  
-  /* Error Message */
-  .error {
-    color: #ef233c;
-    font-weight: bold;
-    text-align: center;
-  }
-  
+    
   /* Device List Container */
   .device-list {
     display: flex;
