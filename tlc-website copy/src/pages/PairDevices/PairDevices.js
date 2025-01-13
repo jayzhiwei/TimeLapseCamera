@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { collection, query, where, getDocs, getDoc , doc, updateDoc, setDoc, serverTimestamp } from "firebase/firestore";
+import { collection, query, where, getDocs, doc, updateDoc, setDoc, serverTimestamp } from "firebase/firestore";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db } from "../../firebase/firebase"; // Update with your Firebase configuration paths
 import '../../App.css';
@@ -46,23 +46,32 @@ const handlePair = async (raspberryId) => {
         let finalName = raspberryName.trim();
 
         if (!finalName) {
-            // Generate a default name if none is provided
-            const userRef = doc(db, "users", currentUser.uid);
-            const userDoc = await getDoc(userRef);
-
-            console.log(userRef)
-
-            // Ensure userDoc exists and retrieve pairedRaspberrys safely
+            // Query the 'raspberrys' collection for documents matching the current user
+            const raspberrysRef = collection(db, "raspberrys");
+            const q = query(raspberrysRef, where("UID", "==", currentUser.uid));
+            const querySnapshot = await getDocs(q);
+        
+            // Initialise pairedRaspberrys
             let pairedRaspberrys = [];
-            if (userDoc.exists()) {
-                const userData = userDoc.data();
-                pairedRaspberrys = userData?.pairedRaspberrys || []; // Safely handle undefined
-            }
-            
-            // Safely filter existing names
+        
+            // Loop through the results to extract the names
+            querySnapshot.forEach((doc) => {
+                const data = doc.data();
+                if (data && data.NAME) {
+                    pairedRaspberrys.push(data.NAME);
+                }
+            });
+        
+            console.log("Paired Raspberrys:", pairedRaspberrys);
+
+            // Safely filter existing names and get the maximum index
             const existingNames = pairedRaspberrys
-                .filter((name) => typeof name === "string" && name.startsWith("Rasp Cam"));
-            const nextIndex = existingNames.length + 1;
+                .filter((name) => typeof name === "string" && name.startsWith("Rasp Cam"))
+                .map((name) => parseInt(name.split(" ")[2], 10)) // Extract index
+                .filter((index) => !isNaN(index)); // Remove invalid numbers
+
+            // Determine next available index
+            const nextIndex = existingNames.length > 0 ? Math.max(...existingNames) + 1 : 1;
             finalName = `Rasp Cam ${nextIndex}`;
         }
         
