@@ -19,7 +19,7 @@
     opacity: 75%;
     border-radius: 20px;
     text-align: left;
-    transition: transform 0.3s ease;
+    transition: transform 0.4s ease;
   }
   
   .deviceCard:hover {
