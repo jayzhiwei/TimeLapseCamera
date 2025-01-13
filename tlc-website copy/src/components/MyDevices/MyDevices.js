@@ -1,10 +1,9 @@
-import React from 'react';
+import React, { useState }  from 'react';
 import { formatFirestoreTimestamp } from '../../functions/formatDate';
 import ErrorMsg from '../ErrorMsg/ErrorMsg.js';
 import RaspiDetail from '../RaspiDetail/RaspiDetail.js';
 import '../../App.css';
 import './MyDevices.css';
-
 
 // React Icon Libraries
 import eth0Icon from "../../images/ethernet.png";
@@ -14,8 +13,12 @@ import { FaCircle, FaWifi, MdOutlineWork } from "../../images/Icons";
 // import { FaCircle, FaWifi, IoBriefcaseOutline, MdOutlineWork } from "../../images/Icons";
 
 const MyDevices = ({ pairedPis, error }) => {
+  const [selectedPi, setSelectedPi] = useState(null);
   if (!pairedPis) return null; // Do not render the component if no error exists
-  
+
+  if (selectedPi) {
+    return <RaspiDetail pi={selectedPi} onBack={() => setSelectedPi(null)} />;
+  }
   return (
     <div className="RaspberryCam">
       <header className="App-background">
@@ -29,9 +32,10 @@ const MyDevices = ({ pairedPis, error }) => {
             <div
             key={pi.serial}
             className="deviceCard"
+            onClick={() => setSelectedPi(pi)}
             >
-              <RaspiDetail pi = {pi} />
-              
+              {/* <RaspiDetail pi = {pi} /> */}
+
               <div className='title'>
                 <h3>{pi.data.NAME}</h3>
                 <div className='status'>
