@@ -1,4 +1,4 @@
-import React, { useState }  from 'react';
+import React, { useState, useEffect }  from 'react';
 import { formatFirestoreTimestamp } from '../../functions/formatDate';
 import ErrorMsg from '../ErrorMsg/ErrorMsg.js';
 import RaspiDetail from '../RaspiDetail/RaspiDetail.js';
@@ -14,8 +14,8 @@ import { FaCircle, FaWifi, MdOutlineWork } from "../../images/Icons";
 
 const MyDevices = ({ pairedPis, error }) => {
   const [selectedPi, setSelectedPi] = useState(null);
+  // console.log(serial)
   if (!pairedPis) return null; // Do not render the component if no error exists
-
   if (selectedPi) {
     return <RaspiDetail pi={selectedPi} onBack={() => setSelectedPi(null)} />;
   }

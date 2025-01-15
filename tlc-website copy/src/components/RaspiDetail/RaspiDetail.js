@@ -3,7 +3,8 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
 import "../../App.js";
 import "./RaspiDetail.css";
-import { MdEdit } from "../../images/Icons.js"
+import { MdEdit, FaImage, FaFilm } from "../../images/Icons.js"
+import { useNavigate } from "react-router-dom";
 
 const RaspiDetail = ({pi, onBack}) => {
     const [timeLapseCases, setTimeLapseCases] = useState([]);
@@ -11,6 +12,7 @@ const RaspiDetail = ({pi, onBack}) => {
     const [error, setError] = useState("");
     const [editingCase, setEditingCase] = useState(null); 
     const [showEditPage, setShowEditPage] = useState(false);
+    const navigate = useNavigate();
     // const [viewPiDetail, setViewPiDetail] = useState("");
 
     // **Fetch TimeLapse Cases**
@@ -46,13 +48,25 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
 };
 
+const handleNavigation = (path, state) => {
+    const { caseId, serial } = state;
+    if (!caseId || typeof caseId !== "string") {
+        console.error("Error: 'caseId' is invalid or undefined");
+        return;
+    }
+    if (!serial || typeof serial !== "string") {
+        console.error("Error: 'serial' is invalid or undefined");
+        return;
+    }
+    navigate(path, { state }); // Pass sanitized state to the new page
+};
+
+
 return (
     <div className="App-background">
-        <h1>{pi.NAME}</h1>
+        <p><strong>{pi.data.NAME}</strong></p>
         <button className="back-button" onClick={onBack}>Back</button>
-        
-        <p><strong>Device Name:</strong> {pi.data.NAME}</p>
-        <p><strong>Serial Number:</strong> {pi.serial}</p>
+        {/* <p><strong>Serial Number:</strong> {pi.serial}</p> */}
 
         {error && <p className="error">{error}</p>}
         {loading && <p>Loading...</p>}
@@ -63,8 +77,9 @@ return (
             <div key={timeLapseCase.id} className="timelapse-item">
                 <div className="edit-timelapse-item">
                     <h3>Case ID: {timeLapseCase.id}</h3>
-                    <button
-                        className="edit-button"
+                    <div>
+                        <button
+                        className="Details-button"
                         onClick={() => {
                             setEditingCase(timeLapseCase); // Store the selected case
                             setShowEditPage(true); // Open the edit page
@@ -72,7 +87,22 @@ return (
                     >
                         <MdEdit />
                     </button>
-                </div>
+
+                    <button
+                    className="Details-button"
+                    onClick={() => handleNavigation("/album", timeLapseCase.id)}
+                    >
+                        <FaImage />
+                    </button>
+
+                    <button
+                    className="Details-button"
+                    onClick={() => handleNavigation("/film", { caseId: timeLapseCase.id, serial: pi.serial })}
+                    >
+                        <FaFilm  />
+                    </button>
+                    </div>
+                    </div>
                 <p>Status: {timeLapseCase.status}</p>
                 <p>
                     {timeLapseCase.captureTime
@@ -101,7 +131,6 @@ return (
       )}
     </div>
   );
-
 }
 // }
 
