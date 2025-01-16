@@ -16,12 +16,12 @@ const Album = ({ pi, caseId, onBack }) => {
     const fetchImages = async () => {
       const storage = getStorage();
       const folderPath = `album/${userUID}/${pi}/${caseId}/`; // Update this path to match your storage structure
-      console.log("Fetching images from:", `album/${pi}/${caseId}/`);
+      // console.log("Fetching images from:", `album/${pi}/${caseId}/`);
       const folderRef = ref(storage, folderPath);
 
       try {
         const res = await listAll(folderRef); // List all files in the folder
-        console.log("Fetched items:", res.items);
+        // console.log("Fetched items:", res.items);
         const urls = await Promise.all(
           res.items.map((item) => getDownloadURL(item)) // Get download URLs
         );
