@@ -1,12 +1,12 @@
 import React from "react";
 import "../../App.css";
-import "./Film.css";
+import "./EditCase.css";
 
-const Film = ({ pi, caseId, onBack }) => {
+const EditCase = ({ pi, caseId, onBack }) => {
     return (
       <div className="App-background">
-        <h1>Film Page</h1>
-        <p>Film Case ID: <strong>{caseId}</strong></p>
+        <h1>Edit Page</h1>
+        <p>Edit Case ID: <strong>{caseId}</strong></p>
         <p>Device Serial: <strong>{pi}</strong></p>
         <button className="back-button" onClick={onBack}>
           Back
@@ -15,4 +15,4 @@ const Film = ({ pi, caseId, onBack }) => {
     );
   };
 
-  export default Film;
+  export default EditCase;

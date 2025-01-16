@@ -233,7 +233,6 @@ function RaspberryCam() {
 
   return (
     <MyDevices error = {error} pairedPis = {pairedPis} />
-
   )
 }
 export default RaspberryCam;

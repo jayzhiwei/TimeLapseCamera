@@ -1,4 +1,4 @@
-import React, { useState, useEffect }  from 'react';
+import React, { useState }  from 'react';
 import { formatFirestoreTimestamp } from '../../functions/formatDate';
 import ErrorMsg from '../ErrorMsg/ErrorMsg.js';
 import RaspiDetail from '../RaspiDetail/RaspiDetail.js';
@@ -19,6 +19,7 @@ const MyDevices = ({ pairedPis, error }) => {
   if (selectedPi) {
     return <RaspiDetail pi={selectedPi} onBack={() => setSelectedPi(null)} />;
   }
+
   return (
     <div className="RaspberryCam">
       <header className="App-background">

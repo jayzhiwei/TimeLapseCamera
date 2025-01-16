@@ -4,16 +4,18 @@ import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
 import "../../App.js";
 import "./RaspiDetail.css";
 import { MdEdit, FaImage, FaFilm } from "../../images/Icons.js"
-import { useNavigate } from "react-router-dom";
+import EditCase from "../EditCase/EditCase.js"
+import Film from "../Film/Film.js"
+import Album from "../Album/Album.js"
 
 const RaspiDetail = ({pi, onBack}) => {
     const [timeLapseCases, setTimeLapseCases] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [editingCase, setEditingCase] = useState(null); 
     const [showEditPage, setShowEditPage] = useState(false);
-    const navigate = useNavigate();
-    // const [viewPiDetail, setViewPiDetail] = useState("");
+    const [showFilmPage, setShowFilmPage] = useState(false); // State to toggle Film component
+    const [showAlbumPage, setShowAlbumPage] = useState(false); // State to toggle Album component
+    const [selectedCaseId, setSelectedCaseId] = useState(null); // State to store selected case ID
 
     // **Fetch TimeLapse Cases**
     useEffect(() => {
@@ -48,19 +50,35 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
 };
 
-const handleNavigation = (path, state) => {
-    const { caseId, serial } = state;
-    if (!caseId || typeof caseId !== "string") {
-        console.error("Error: 'caseId' is invalid or undefined");
-        return;
+    if (showEditPage) {
+        return (
+            <EditCase
+            pi={pi.serial}
+            caseId={selectedCaseId}
+            onBack={() => setShowEditPage(false)} // Back to RaspiDetail
+            />
+        );
     }
-    if (!serial || typeof serial !== "string") {
-        console.error("Error: 'serial' is invalid or undefined");
-        return;
-    }
-    navigate(path, { state }); // Pass sanitized state to the new page
-};
 
+    if (showAlbumPage) {
+        return (
+            <Album
+            pi={pi.serial}
+            caseId={selectedCaseId}
+            onBack={() => setShowAlbumPage(false)} // Back to RaspiDetail
+            />
+        );
+        }
+
+    if (showFilmPage) {
+        return (
+            <Film
+            pi={pi.serial}
+            caseId={selectedCaseId}
+            onBack={() => setShowFilmPage(false)} // Back to RaspiDetail
+            />
+        );
+    }
 
 return (
     <div className="App-background">
@@ -81,28 +99,34 @@ return (
                         <button
                         className="Details-button"
                         onClick={() => {
-                            setEditingCase(timeLapseCase); // Store the selected case
-                            setShowEditPage(true); // Open the edit page
+                            setSelectedCaseId(timeLapseCase.id);
+                            setShowEditPage(true);
                         }}
-                    >
+                        >
                         <MdEdit />
                     </button>
 
-                    <button
-                    className="Details-button"
-                    onClick={() => handleNavigation("/album", timeLapseCase.id)}
-                    >
-                        <FaImage />
+                        <button
+                        className="Details-button"
+                        onClick={() => {
+                            setSelectedCaseId(timeLapseCase.id);
+                            setShowAlbumPage(true);
+                        }}
+                        >
+                            <FaImage />
                     </button>
 
-                    <button
-                    className="Details-button"
-                    onClick={() => handleNavigation("/film", { caseId: timeLapseCase.id, serial: pi.serial })}
-                    >
-                        <FaFilm  />
+                        <button
+                        className="Details-button"
+                        onClick={() => {
+                            setSelectedCaseId(timeLapseCase.id);
+                            setShowFilmPage(true);
+                        }}
+                        >
+                            <FaFilm  />
                     </button>
                     </div>
-                    </div>
+                </div>
                 <p>Status: {timeLapseCase.status}</p>
                 <p>
                     {timeLapseCase.captureTime

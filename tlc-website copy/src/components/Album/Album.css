@@ -1,0 +1,59 @@
+.App-background {
+    background-color: #f4f4f4; /* Light grey background */
+    padding: 20px;
+    min-height: 100vh; /* Ensure full viewport height */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  
+  .back-button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+  }
+  
+  .error {
+    color: red;
+    margin: 20px 0;
+  }
+  
+  .image-grid {
+    display: flex;
+    flex-wrap: wrap; /* Allow images to wrap */
+    gap: 15px; /* Space between images */
+    justify-content: center; /* Center the images */
+  }
+  
+  .album-image {
+    width: 50%; /* Fixed width for images */
+    height: 5%; /* Fixed height for images */
+    object-fit: cover; /* Maintain aspect ratio and crop if necessary */
+    border: 2px solid #ccc; /* Light grey border */
+    border-radius: 10px; /* Rounded corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+  }
+  
+  .album-image:hover {
+    transform: scale(1.05); /* Slight zoom effect on hover */
+    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.2); /* Enhanced shadow on hover */
+  }
+  
+  .loading,
+  .error {
+    font-size: 18px;
+    color: #666;
+    margin-top: 20px;
+  }
+  
