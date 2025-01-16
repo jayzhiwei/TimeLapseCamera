@@ -5,6 +5,29 @@ const { google } = require('googleapis');
 const cors = require('cors');
 const app = express();
 const PORT = 5000;
+const { getStorage, ref, getDownloadURL } = require("firebase/storage");
+
+// Route to serve files from Firebase Storage
+app.get('/firebase-file/:path(*)', async (req, res) => {
+  try {
+    const storage = getStorage();
+    const filePath = req.params.path; // e.g., "album/userID/piID/caseID/file.jpg"
+    const fileRef = ref(storage, filePath);
+
+    const fileURL = await getDownloadURL(fileRef);
+
+    // Stream the file to the client
+    const response = await fetch(fileURL);
+    if (!response.ok) {
+      throw new Error("Failed to fetch file from Firebase Storage.");
+    }
+
+    response.body.pipe(res);
+  } catch (error) {
+    console.error(`[${new Date().toLocaleString()}] Failed to retrieve file:`, error.message);
+    res.status(500).json({ message: 'Failed to retrieve file.', error: error.message });
+  }
+});
 
 // Enable CORS
 app.use(cors({

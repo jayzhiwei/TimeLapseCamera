@@ -2,10 +2,10 @@ import React, { useEffect, useState, useContext } from 'react'; // Import useCon
 import { Route, Routes } from 'react-router-dom';
 import Navbar from './components/NavBar/Navbar';
 import About from './pages/About';
-import Albums from './pages/Album/Album';
-import Film from './pages/Film/Film';
+import Albums from './components/Album/Album';
+import Film from './components/Film/Film';
 import Home from './pages/Home/Home';
-import RaspberryCam from './pages/MyDevices/RaspberryCam';
+import RaspberryCam from './pages/RaspberryCam/RaspberryCam';
 import PairDevices from './pages/PairDevices/PairDevices';
 import FolderContent from './pages/FolderContent';
 import { UserProvider, UserContext } from './components/UserContext'; // Import UserContext here

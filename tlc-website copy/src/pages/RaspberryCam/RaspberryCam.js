@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
 import { ref, onValue } from "firebase/database"; // Real time database
 import { onAuthStateChanged } from "firebase/auth";
-import { auth, db, realtimeDB } from '../../firebase/firebase';
+import { auth, db, realtimeDB } from '../../firebase/firebase.js';
 import MyDevices from '../../components/MyDevices/MyDevices.js';
 import '../../App.css';
 import './RaspberryCam.css';
@@ -233,7 +233,6 @@ function RaspberryCam() {
 
   return (
     <MyDevices error = {error} pairedPis = {pairedPis} />
-
   )
 }
 export default RaspberryCam;

@@ -3,15 +3,19 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
 import "../../App.js";
 import "./RaspiDetail.css";
-import { MdEdit } from "../../images/Icons.js"
+import { MdEdit, FaImage, FaFilm } from "../../images/Icons.js"
+import EditCase from "../EditCase/EditCase.js"
+import Film from "../Film/Film.js"
+import Album from "../Album/Album.js"
 
 const RaspiDetail = ({pi, onBack}) => {
     const [timeLapseCases, setTimeLapseCases] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [editingCase, setEditingCase] = useState(null); 
     const [showEditPage, setShowEditPage] = useState(false);
-    // const [viewPiDetail, setViewPiDetail] = useState("");
+    const [showFilmPage, setShowFilmPage] = useState(false); // State to toggle Film component
+    const [showAlbumPage, setShowAlbumPage] = useState(false); // State to toggle Album component
+    const [selectedCaseId, setSelectedCaseId] = useState(null); // State to store selected case ID
 
     // **Fetch TimeLapse Cases**
     useEffect(() => {
@@ -46,13 +50,41 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
 };
 
+    if (showEditPage) {
+        return (
+            <EditCase
+            pi={pi.serial}
+            caseId={selectedCaseId}
+            onBack={() => setShowEditPage(false)} // Back to RaspiDetail
+            />
+        );
+    }
+
+    if (showAlbumPage) {
+        return (
+            <Album
+            pi={pi.serial}
+            caseId={selectedCaseId}
+            onBack={() => setShowAlbumPage(false)} // Back to RaspiDetail
+            />
+        );
+        }
+
+    if (showFilmPage) {
+        return (
+            <Film
+            pi={pi.serial}
+            caseId={selectedCaseId}
+            onBack={() => setShowFilmPage(false)} // Back to RaspiDetail
+            />
+        );
+    }
+
 return (
     <div className="App-background">
-        <h1>{pi.NAME}</h1>
+        <p><strong>{pi.data.NAME}</strong></p>
         <button className="back-button" onClick={onBack}>Back</button>
-        
-        <p><strong>Device Name:</strong> {pi.data.NAME}</p>
-        <p><strong>Serial Number:</strong> {pi.serial}</p>
+        {/* <p><strong>Serial Number:</strong> {pi.serial}</p> */}
 
         {error && <p className="error">{error}</p>}
         {loading && <p>Loading...</p>}
@@ -63,15 +95,37 @@ return (
             <div key={timeLapseCase.id} className="timelapse-item">
                 <div className="edit-timelapse-item">
                     <h3>Case ID: {timeLapseCase.id}</h3>
-                    <button
-                        className="edit-button"
+                    <div>
+                        <button
+                        className="Details-button"
                         onClick={() => {
-                            setEditingCase(timeLapseCase); // Store the selected case
-                            setShowEditPage(true); // Open the edit page
+                            setSelectedCaseId(timeLapseCase.id);
+                            setShowEditPage(true);
                         }}
-                    >
+                        >
                         <MdEdit />
                     </button>
+
+                        <button
+                        className="Details-button"
+                        onClick={() => {
+                            setSelectedCaseId(timeLapseCase.id);
+                            setShowAlbumPage(true);
+                        }}
+                        >
+                            <FaImage />
+                    </button>
+
+                        <button
+                        className="Details-button"
+                        onClick={() => {
+                            setSelectedCaseId(timeLapseCase.id);
+                            setShowFilmPage(true);
+                        }}
+                        >
+                            <FaFilm  />
+                    </button>
+                    </div>
                 </div>
                 <p>Status: {timeLapseCase.status}</p>
                 <p>
@@ -101,7 +155,6 @@ return (
       )}
     </div>
   );
-
 }
 // }
 

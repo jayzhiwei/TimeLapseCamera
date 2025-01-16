@@ -129,16 +129,16 @@
       color: #ef233c;
     }
       
-    .edit-button {
+    .Details-button {
       /* background-color: #007bff; */
-      color: grey;
+      color: rgb(99, 93, 93);
       border: none;
       cursor: pointer;
       border-radius: 3px;
       font-size: 20px;
     }
 
-    .edit-button:hover {
+    .Details-button:hover {
       background-color: #c1d7ef;
       transform: scale(1.05);
     }

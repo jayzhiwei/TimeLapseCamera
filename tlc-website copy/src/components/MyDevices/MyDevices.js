@@ -14,11 +14,12 @@ import { FaCircle, FaWifi, MdOutlineWork } from "../../images/Icons";
 
 const MyDevices = ({ pairedPis, error }) => {
   const [selectedPi, setSelectedPi] = useState(null);
+  // console.log(serial)
   if (!pairedPis) return null; // Do not render the component if no error exists
-
   if (selectedPi) {
     return <RaspiDetail pi={selectedPi} onBack={() => setSelectedPi(null)} />;
   }
+
   return (
     <div className="RaspberryCam">
       <header className="App-background">
