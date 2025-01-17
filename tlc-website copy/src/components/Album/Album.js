@@ -3,6 +3,7 @@ import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import "../../App.css";
 import "./Album.css";
 import { getAuth } from "firebase/auth";
+import Img2Video from "../Img2Video/Img2Video.js"
 
 const Album = ({ pi, caseId, onBack }) => {
   const [images, setImages] = useState([]);
@@ -11,6 +12,7 @@ const Album = ({ pi, caseId, onBack }) => {
   const auth = getAuth();
   const currentUser = auth.currentUser;
   const userUID = currentUser ? currentUser.uid : null;
+  const [showImg2VideoPage, setShowImg2VideoPage] = useState(false);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -36,6 +38,16 @@ const Album = ({ pi, caseId, onBack }) => {
     fetchImages();
   }, [userUID, pi, caseId]);
 
+  if (showImg2VideoPage) {
+    return (
+        <Img2Video
+        pi={pi}
+        caseId={caseId}
+        onBack={() => setShowImg2VideoPage(false)} // Back to RaspiDetail
+        />
+    );
+}
+
   return (
     <div className="App-background">
       <h1>Album Page</h1>
@@ -43,6 +55,13 @@ const Album = ({ pi, caseId, onBack }) => {
       <p>Device Serial: <strong>{pi}</strong></p>
       <button className="back-button" onClick={onBack}>
         Back
+      </button>
+      <button
+        className="Details-button"
+        onClick={() => {;
+            setShowImg2VideoPage(true);
+        }}>
+        Image to Video
       </button>
       {loading && <p>Loading images...</p>}
       {error && <p className="error">{error}</p>}
