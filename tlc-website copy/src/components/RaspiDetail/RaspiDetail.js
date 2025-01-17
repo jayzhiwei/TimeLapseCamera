@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
-import "../../App.js";
+import "../../App.css";
 import "./RaspiDetail.css";
-import { MdEdit, FaImage, FaFilm } from "../../images/Icons.js"
+import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
 import EditCase from "../EditCase/EditCase.js"
 import Film from "../Film/Film.js"
 import Album from "../Album/Album.js"
@@ -30,6 +30,7 @@ const RaspiDetail = ({pi, onBack}) => {
             ...doc.data(),
             }));
             setTimeLapseCases(cases); // Store fetched data
+            // console.log(timeLapseCases);
             setLoading(false); // Stop loading
         } catch (err) {
             setError("Failed to fetch TimeLapse cases.");
@@ -54,7 +55,7 @@ const formatDate = (dateString) => {
         return (
             <EditCase
             pi={pi.serial}
-            caseId={selectedCaseId}
+            fullcase={selectedCaseId}
             onBack={() => setShowEditPage(false)} // Back to RaspiDetail
             />
         );
@@ -82,73 +83,82 @@ const formatDate = (dateString) => {
 
 return (
     <div className="App-background">
-        <p><strong>{pi.data.NAME}</strong></p>
-        <button className="back-button" onClick={onBack}>Back</button>
         {/* <p><strong>Serial Number:</strong> {pi.serial}</p> */}
 
         {error && <p className="error">{error}</p>}
         {loading && <p>Loading...</p>}
 
         {timeLapseCases.length > 0 && (
-        <div className="timelapse-list">
+            <div className="timelapse-list">
+                <div className="this-device-details">
+                    <button className="back-button" onClick={onBack}>
+                        <GrLinkPrevious />
+                    </button>
+                </div>
+
+                <p className="device-name"><strong>{pi.data.NAME}</strong></p>
           {timeLapseCases.map((timeLapseCase) => (
             <div key={timeLapseCase.id} className="timelapse-item">
-                <div className="edit-timelapse-item">
-                    <h3>Case ID: {timeLapseCase.id}</h3>
-                    <div>
-                        <button
-                        className="Details-button"
-                        onClick={() => {
-                            setSelectedCaseId(timeLapseCase.id);
-                            setShowEditPage(true);
-                        }}
-                        >
-                        <MdEdit />
-                    </button>
+                <div className="timelapse-item-header">
+                    <h3>{timeLapseCase.name}</h3>
+                    <div className="icons">
+                        <div className='job-status'>
+                            {(() => {
+                            const timeLapseStatus = timeLapseCase?.status;
+                            if (pi.online) {
+                                if (timeLapseStatus === "running") {
+                                return (
+                                    <div className="busyStatus" style={{ strokeWidth: "15" }}>
+                                        <MdOutlineWork />
+                                        <span className="device-status">This case is running</span>
+                                    </div>
+                                );
+                                }
+                                // If online and no running TimeLapseCase, ready for new case
+                                return (
+                                <div className="freeStatus">
+                                    <MdOutlineWork />
+                                    <span className="device-status">This case is on {timeLapseStatus} mode</span>
+                                </div>
+                                );
+                            } else {
+                                // Device offline
+                                return (
+                                <div className="unavailableStatus">
+                                    <MdOutlineWork />
+                                    <span className="device-status">TimeLapse Case cannot run because this device is offline </span>
+                                </div>
+                                );
+                            }
+                            })()}
+                        </div>
 
                         <button
-                        className="Details-button"
-                        onClick={() => {
-                            setSelectedCaseId(timeLapseCase.id);
-                            setShowAlbumPage(true);
-                        }}
-                        >
+                            className="Details-button"
+                            onClick={() => {
+                                setSelectedCaseId(timeLapseCase);
+                                setShowAlbumPage(true);
+                            }}
+                            >
                             <FaImage />
-                    </button>
+                        </button>
 
                         <button
-                        className="Details-button"
-                        onClick={() => {
-                            setSelectedCaseId(timeLapseCase.id);
-                            setShowFilmPage(true);
-                        }}
-                        >
+                            className="Details-button"
+                            onClick={() => {
+                                setSelectedCaseId(timeLapseCase.id);
+                                setShowFilmPage(true);
+                            }}
+                            >
                             <FaFilm  />
-                    </button>
+                        </button>
                     </div>
                 </div>
-                <p>Status: {timeLapseCase.status}</p>
-                <p>
-                    {timeLapseCase.captureTime
-                        ? (() => {
-                            const [startTime, endTime] = timeLapseCase.captureTime.split("_");
-                            // Helper function to convert time to 12-hour format
-                            const formatTime = (time) => {
-                            const [hours, minutes, seconds] = time.split(":").map(Number);
-                            const period = hours >= 12 ? "PM" : "AM";
-                            const formattedHours = hours % 12 || 12; // Convert to 12-hour format
-                            return `${formattedHours.toString().padStart(2, "0")}:${minutes
-                                .toString()
-                                .padStart(2, "0")}:${seconds.toString().padStart(2, "0")} ${period}`;
-                            };
-                            return `from ${formatTime(startTime)} to ${formatTime(endTime)}`;
-                        })()
-                        : "Capture Time Not Available"}
-                </p>
-                <p>Resolution: {timeLapseCase.resolution}</p>
-                <p>Interval Value: {timeLapseCase.intervalValue} {timeLapseCase.timeUnit}</p>
-                <p>Capture Job Start: {formatDate(timeLapseCase.caseStart)}</p>
-                <p>Capture Job End: &nbsp;{formatDate(timeLapseCase.caseEnd)}</p>
+
+                <div className="timelapse-item-details">
+                    <p>Start: {formatDate(timeLapseCase.caseStart)}</p>
+                    <p>End: &nbsp;{formatDate(timeLapseCase.caseEnd)}</p>
+                </div>
             </div>
           ))}
         </div>
