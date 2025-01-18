@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from "react";
 import "../../App.css";
 import "./CaseEdit.css";
-import { getAuth } from "firebase/auth";
+// import { getAuth } from "firebase/auth";
 import { updateDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 
 const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    const userUID = currentUser ? currentUser.uid : null;
+    // const auth = getAuth();
+    // const currentUser = auth.currentUser;
+    // const userUID = currentUser ? currentUser.uid : null;
     const [formData, setFormData] = useState(fullcase);
     const [hasChanges, setHasChanges] = useState(false);
 
     const fieldOrder = [
         "name",
-        "status",
+        // "status",
         "resolution",
         "intervalValue",
         "timeUnit",
@@ -25,7 +25,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
 
     const fieldLabels = {
         name: "Name",
-        status: "Status",
+        // status: "Status",
         resolution: "Resolution",
         intervalValue: "Interval Value",
         timeUnit: "Time Unit",
@@ -65,8 +65,8 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
             .toString()
             .padStart(2, "0")}`;
         // Save changes to Firebase
-        const { id, ...updatedData } = formData; // Destructure to exclude `id`
-        updatedData.UID = userUID;
+        const { id, UID, ...updatedData } = formData; // Destructure to exclude `id`
+        // updatedData.UID = userUID;
         updatedData.updated_at = formattedNow;
         // console.log("Updated Data:", updatedData);
 
@@ -102,13 +102,13 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                     <option value="SD_480p">480p SD</option>
                 </select>
                 )}
-                {key === "status" && (
+                {/* {key === "status" && (
                 <select id={key} name={key} value={formData[key] || ""} onChange={handleChange}>
                     <option value="aborted">Stop</option>
                     <option value="running">Start</option>
                     <option value="standby">Save</option>
                 </select>
-                )}
+                )} */}
                 {key === "intervalValue" && (
                 <input
                     id={key}
@@ -131,6 +131,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                 <input
                     id={key}
                     name={key}
+                    step="1"
                     type="datetime-local"
                     value={new Date(new Date(formData[key]).getTime() + 8 * 60 * 60 * 1000)
                     .toISOString()
@@ -145,6 +146,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                     id="captureStart"
                     name="captureStart"
                     type="time"
+                    step="1"
                     value={formData[key]?.split("_")[0] || ""}
                     onChange={(e) =>
                         handleChange({
@@ -160,6 +162,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                     id="captureEnd"
                     name="captureEnd"
                     type="time"
+                    step="1"
                     value={formData[key]?.split("_")[1] || ""}
                     onChange={(e) =>
                         handleChange({

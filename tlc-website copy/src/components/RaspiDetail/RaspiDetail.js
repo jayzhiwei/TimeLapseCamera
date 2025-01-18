@@ -5,8 +5,10 @@ import "../../App.css";
 import "./RaspiDetail.css";
 import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
 import CasePreview from "../CasePreview/CasePreview.js"
+import CaseAdd from "../CaseAdd/CaseAdd"
 import Film from "../Film/Film.js"
 import Album from "../Album/Album.js"
+
 
 const RaspiDetail = ({pi, onBack}) => {
     const [timeLapseCases, setTimeLapseCases] = useState([]);
@@ -15,6 +17,7 @@ const RaspiDetail = ({pi, onBack}) => {
     const [showEditPage, setShowEditPage] = useState(false);
     const [showFilmPage, setShowFilmPage] = useState(false); // State to toggle Film component
     const [showAlbumPage, setShowAlbumPage] = useState(false); // State to toggle Album component
+    const [showCaseAddPage, setShowCaseAddPage] = useState(false); // State to toggle Album component
     const [selectedCaseId, setSelectedCaseId] = useState(null); // State to store selected case ID
 
     // **Fetch TimeLapse Cases**
@@ -29,8 +32,8 @@ const RaspiDetail = ({pi, onBack}) => {
             id: doc.id,
             ...doc.data(),
             }));
+
             setTimeLapseCases(cases); // Store fetched data
-            // console.log(timeLapseCases);
             setLoading(false); // Stop loading
         } catch (err) {
             setError("Failed to fetch TimeLapse cases.");
@@ -51,7 +54,7 @@ const RaspiDetail = ({pi, onBack}) => {
         return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
     };
     
-    const handleSaveSuccess = async () => {
+    const handleSaveSuccess = async (id = null) => {
         const timeLapseRef = collection(db, `raspberrys/${pi.serial}/TimeLapseCase`);
         const timeLapseSnapshot = await getDocs(timeLapseRef);
     
@@ -60,12 +63,18 @@ const RaspiDetail = ({pi, onBack}) => {
             ...doc.data(),
         }));
     
-        setTimeLapseCases(updatedCases); // Update the list
-        const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
-        setSelectedCaseId(updatedCase); // Update the selected case with fresh data
-        setShowEditPage(true); // Switch back to view mode
-    };
+        setTimeLapseCases(updatedCases); // Update the list of cases
 
+        if (selectedCaseId) {
+            const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
+            setSelectedCaseId(updatedCase); // Update the selected case
+            setShowEditPage(true); // Stay in edit mode
+        } else {
+            setShowEditPage(false);
+            setShowCaseAddPage(false);
+        }
+    };
+    
     if (showEditPage) {
         return (
             <CasePreview
@@ -97,6 +106,16 @@ const RaspiDetail = ({pi, onBack}) => {
         );
     }
 
+    if (showCaseAddPage) {
+        return (
+            <CaseAdd
+            pi={pi.serial}
+            onBack={() => setShowCaseAddPage(false)} // Back to RaspiDetail
+            onSaveSuccess={handleSaveSuccess}
+            />
+        );
+    }
+
 return (
     <div className="App-background">
         {/* <p><strong>Serial Number:</strong> {pi.serial}</p> */}
@@ -109,6 +128,13 @@ return (
                 <div className="this-device-details">
                     <button className="back-button" onClick={onBack}>
                         <GrLinkPrevious />
+                    </button>
+
+                    <button className="back-button" onClick={() => {
+                        setShowCaseAddPage(true);
+                        setSelectedCaseId(null);
+                    }}>
+                        Create new case
                     </button>
                 </div>
 
