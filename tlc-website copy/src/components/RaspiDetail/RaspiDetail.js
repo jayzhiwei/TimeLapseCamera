@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
+import { db } from "../../firebase/firebase.js";
 import "../../App.css";
 import "./RaspiDetail.css";
 import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
@@ -40,16 +40,31 @@ const RaspiDetail = ({pi, onBack}) => {
         fetchTimeLapseCases();
     }, [pi.serial]); // Runs whenever `pi.serial` changes
 
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const seconds = date.getSeconds().toString().padStart(2, "0");
-    return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
-};
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const seconds = date.getSeconds().toString().padStart(2, "0");
+        return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
+    };
+    
+    const handleSaveSuccess = async () => {
+        const timeLapseRef = collection(db, `raspberrys/${pi.serial}/TimeLapseCase`);
+        const timeLapseSnapshot = await getDocs(timeLapseRef);
+    
+        const updatedCases = timeLapseSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+    
+        setTimeLapseCases(updatedCases); // Update the list
+        const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
+        setSelectedCaseId(updatedCase); // Update the selected case with fresh data
+        setShowEditPage(true); // Switch back to view mode
+    };    
 
     if (showEditPage) {
         return (
@@ -57,6 +72,7 @@ const formatDate = (dateString) => {
             pi={pi.serial}
             fullcase={selectedCaseId}
             onBack={() => setShowEditPage(false)} // Back to RaspiDetail
+            onSaveSuccess={handleSaveSuccess} // Pass the callback
             />
         );
     }
@@ -65,7 +81,7 @@ const formatDate = (dateString) => {
         return (
             <Album
             pi={pi.serial}
-            caseId={selectedCaseId}
+            caseId={selectedCaseId.id}
             onBack={() => setShowAlbumPage(false)} // Back to RaspiDetail
             />
         );
@@ -75,7 +91,7 @@ const formatDate = (dateString) => {
         return (
             <Film
             pi={pi.serial}
-            caseId={selectedCaseId}
+            caseId={selectedCaseId.id}
             onBack={() => setShowFilmPage(false)} // Back to RaspiDetail
             />
         );
@@ -134,19 +150,21 @@ return (
                         </div>
 
                         <button
-                            className="Details-button"
-                            onClick={() => {
-                                setSelectedCaseId(timeLapseCase);
-                                setShowAlbumPage(true);
-                            }}
-                            >
+                        className="Details-button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCaseId(timeLapseCase);
+                            setShowAlbumPage(true);
+                        }}
+                        >
                             <FaImage />
                         </button>
 
                         <button
                             className="Details-button"
-                            onClick={() => {
-                                setSelectedCaseId(timeLapseCase.id);
+                            onClick={(e) => {
+                            e.stopPropagation();
+                                setSelectedCaseId(timeLapseCase);
                                 setShowFilmPage(true);
                             }}
                             >
