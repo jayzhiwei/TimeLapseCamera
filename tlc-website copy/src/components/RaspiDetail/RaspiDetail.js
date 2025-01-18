@@ -4,7 +4,7 @@ import { db } from "../../firebase/firebase.js";
 import "../../App.css";
 import "./RaspiDetail.css";
 import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
-import EditCase from "../EditCase/EditCase.js"
+import CasePreview from "../CasePreview/CasePreview.js"
 import Film from "../Film/Film.js"
 import Album from "../Album/Album.js"
 
@@ -64,11 +64,11 @@ const RaspiDetail = ({pi, onBack}) => {
         const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
         setSelectedCaseId(updatedCase); // Update the selected case with fresh data
         setShowEditPage(true); // Switch back to view mode
-    };    
+    };
 
     if (showEditPage) {
         return (
-            <EditCase
+            <CasePreview
             pi={pi.serial}
             fullcase={selectedCaseId}
             onBack={() => setShowEditPage(false)} // Back to RaspiDetail

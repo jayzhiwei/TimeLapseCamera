@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect,  } from "react";
 import "../../App.css";
 import "./EditCase.css";
 import { getAuth } from "firebase/auth";
 import { MdEdit } from "../../images/Icons.js";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc,  } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 
 const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
@@ -15,6 +15,9 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
   const [formData, setFormData] = useState({});
   const [isEditing, setIsEditing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  // const [unsubscribe, setUnsubscribe] = useState(null);
+  // const listenerAttached = useRef(false);
+  // const lastAlertedStatus = useRef(null); // Track the last alerted status
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -53,6 +56,64 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
   useEffect(() => {
     setFormData(fullcase);
   }, [fullcase]);
+ 
+  // Handle Status changes
+  const handleStatusChange = async (newStatus) => {
+    try {
+      const now = new Date();
+      const formattedNow = `${now.getFullYear()}-${(now.getMonth() + 1)
+        .toString()
+        .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now
+        .getHours()
+        .toString()
+        .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
+        .getSeconds()
+        .toString()
+        .padStart(2, "0")}`;
+
+          // If the new status is "aborted", confirm with the user
+      if (newStatus === "aborted") {
+        const userConfirmed = window.confirm(
+          "Are you sure you want to abort this job?"
+        );
+        if (!userConfirmed) {
+          return; // Exit without making changes if the user cancels
+        }
+      }
+  
+      const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+      await updateDoc(docRef, {
+        status: newStatus,
+        UID: userUID,
+        updated_at: formattedNow,
+      })
+      onSaveSuccess();
+      setHasChanges(false); // Disable save button
+      setIsEditing(false); // Exit editing mode
+
+      // Update the local state to reflect the status change
+      setFormData((prevData) => ({
+        ...prevData,
+        status: newStatus,
+      }));   
+
+      // // Start or stop listening based on the status
+      // if (newStatus === "running") {
+      //   startListening();
+      // } else {
+      //   stopListening();
+      // }
+      onSaveSuccess();
+      if (newStatus !== "aborted")
+        {
+          alert(`Status updated to ${newStatus}`);
+        }
+      
+    } catch (error) {
+      console.error("Error updating status:", error.message);
+      alert("Failed to update status. Please try again.");
+    }
+  };
 
   // Handle input changes
   const handleChange = (e) => {
@@ -102,6 +163,72 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
     }
   };
 
+  // const startListening = useCallback(() => {
+  //   if (listenerAttached.current) return; // Avoid reattaching the listener
+  
+  //   const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+  //   const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
+  //     if (docSnapshot.exists()) {
+  //       const updatedData = docSnapshot.data();
+  //       setFormData(updatedData);
+  
+  //       // Check for status changes and ensure alerts are only shown once
+  //       if (updatedData.status !== lastAlertedStatus.current) {
+  //         if (updatedData.status === "completed") {
+  //           alert("The job has been completed!");
+  //           lastAlertedStatus.current = "completed"; // Update last alerted status
+  //           onSaveSuccess();
+  //         } else if (updatedData.status === "aborted") {
+  //           alert("The job has been aborted!");
+  //           lastAlertedStatus.current = "aborted"; // Update last alerted status
+  //           onSaveSuccess();
+  //         }
+  //       }
+  //     }
+  //   });
+  
+  //   // Mark the listener as attached
+  //   listenerAttached.current = true;
+  
+  //   // Cleanup function to detach the listener when needed
+  //   return () => {
+  //     unsubscribe();
+  //     listenerAttached.current = false;
+  //   };
+  // }, [pi, fullcase.id, onSaveSuccess]);
+  
+  // const stopListening = useCallback(() => {
+  //   if (listenerAttached.current) {
+  //     listenerAttached.current = false;
+  //   }
+  // }, []);  
+
+  // useEffect(() => {
+  //   if (formData.status === "running") {
+  //     startListening();
+  //   } else {
+  //     stopListening();
+  //   }
+
+  //   return () => {
+  //     stopListening();
+  //   };
+  // }, [formData.status, startListening, stopListening]);
+  
+  // useEffect(() => {
+  //   let cleanupFn;
+  //   if (formData.status === "running") {
+  //     cleanupFn = startListening();
+  //   } else {
+  //     stopListening();
+  //   }
+  
+  //   // Cleanup the listener when component unmounts or status changes
+  //   return () => {
+  //     if (cleanupFn) cleanupFn();
+  //   };
+  // }, [formData.status, startListening, stopListening]);
+  
   return (
     <div className="App-background">
       <h1>{fullcase.name}</h1>
@@ -289,6 +416,24 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
           <p>Interval Value: {fullcase.intervalValue} {fullcase.timeUnit}</p>
           <p>Capture Job Start: {formatDate(fullcase.caseStart)}</p>
           <p>Capture Job End: &nbsp;{formatDate(fullcase.caseEnd)}</p>
+
+          {/* Run and Stop buttons */}
+          <div className="action-buttons">
+            <button
+              className="run-button"
+              onClick={() => handleStatusChange("running")}
+              disabled={fullcase.status === "running"}
+            >
+              Run
+            </button>
+            <button
+              className="stop-button"
+              onClick={() => handleStatusChange("aborted")}
+              disabled={["aborted", "completed"].includes(fullcase.status)}
+            >
+              Stop
+            </button>
+          </div>
 
           <button
             className="back-button"
