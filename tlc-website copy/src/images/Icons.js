@@ -2,6 +2,7 @@ import { FaCircle, FaImage, FaFilm, FaVideo, FaLink, FaCircleInfo } from "react-
 import { TbAlertTriangleFilled } from "react-icons/tb"; 
 import { FaWifi } from "react-icons/fa";
 import { MdOutlineWork, MdEdit } from "react-icons/md";
+import { GrLinkPrevious } from "react-icons/gr";
 
 export {
     FaCircle,   // Fill circle "<FaCircle />"
@@ -14,4 +15,5 @@ export {
     FaVideo,
     FaLink,
     FaCircleInfo,
+    GrLinkPrevious, // go to previous page "<GrLinkPrevious />"
 }

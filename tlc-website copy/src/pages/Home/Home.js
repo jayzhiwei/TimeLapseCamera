@@ -5,6 +5,7 @@ import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { UserContext } from '../../components/UserContext';
 import '../../App.css';
 import './Home.css';
+import MyDevices from '../../components/MyDevices/MyDevices.js';
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const db = getFirestore();
@@ -298,6 +299,8 @@ function Home() {
     return () => unsubscribe();
   }, [setUserProfile]);
 
+
+
   return (
     <div className="App-background">
       {/* {error && <div className="error">{error}</div>} */}
@@ -483,6 +486,7 @@ function Home() {
           )}
         </div>
       )}
+      <MyDevices />
     </div>
   );
 }

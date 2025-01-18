@@ -5,7 +5,6 @@ import About from './pages/About';
 import Albums from './components/Album/Album';
 import Film from './components/Film/Film';
 import Home from './pages/Home/Home';
-import RaspberryCam from './pages/RaspberryCam/RaspberryCam';
 import PairDevices from './pages/PairDevices/PairDevices';
 import FolderContent from './pages/FolderContent';
 import { UserProvider, UserContext } from './components/UserContext'; // Import UserContext here
@@ -47,7 +46,6 @@ function AppContent() {
           <Route path='/album' element={<Albums />} />
           <Route path='/film' element={<Film />} />
           <Route path='/about' element={<About />} />
-          <Route path='/myDevices' element={<RaspberryCam />} />
           <Route path='/PairDevices' element={<PairDevices />} />
           <Route path='/folder/:id' element={<FolderContent isSignedIn={isSignedIn} />} />
         </Routes>
