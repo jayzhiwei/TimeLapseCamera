@@ -325,7 +325,7 @@ function Home() {
                 )}
               {email !== "" &&(
                 <span 
-                className={isValidEmail(email) ? "" : "error"}>
+                  className={isValidEmail(email) ? "" : "error"}>
                   {isValidEmail(email) === true
                     ? "Valid email address"
                     : "Please enter a valid email address"

@@ -3,6 +3,7 @@ import { TbAlertTriangleFilled } from "react-icons/tb";
 import { FaWifi } from "react-icons/fa";
 import { MdOutlineWork, MdEdit } from "react-icons/md";
 import { GrLinkPrevious } from "react-icons/gr";
+import { VscSignOut } from "react-icons/vsc";
 
 export {
     FaCircle,   // Fill circle "<FaCircle />"
@@ -16,4 +17,5 @@ export {
     FaLink,
     FaCircleInfo,
     GrLinkPrevious, // go to previous page "<GrLinkPrevious />"
+    VscSignOut,
 }

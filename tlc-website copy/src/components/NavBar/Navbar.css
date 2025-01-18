@@ -30,9 +30,8 @@
     padding-right: 5px;
 }
 
-.nav-links a i {
-    margin-right: 0;
-    font-size: 20px;
+.nav-links .icons{
+    font-size: 22px;
 }
 
 @media (max-width: 494px) {
