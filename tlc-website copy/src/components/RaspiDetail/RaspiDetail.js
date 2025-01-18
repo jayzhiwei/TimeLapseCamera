@@ -114,7 +114,11 @@ return (
 
                 <p className="device-name"><strong>{pi.data.NAME}</strong></p>
           {timeLapseCases.map((timeLapseCase) => (
-            <div key={timeLapseCase.id} className="timelapse-item">
+            <div key={timeLapseCase.id} className="timelapse-item"
+            onClick={() => {
+                setSelectedCaseId(timeLapseCase);
+                setShowEditPage(true);
+            }}>
                 <div className="timelapse-item-header">
                     <h3>{timeLapseCase.name}</h3>
                     <div className="icons">
