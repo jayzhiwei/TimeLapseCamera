@@ -1,21 +1,21 @@
-import React, { useState, useEffect, useCallback, useRef  } from "react";
+import React, { useState, useEffect, } from "react";
 import "../../App.css";
 import "./CasePreview.css";
 import { getAuth } from "firebase/auth";
 import { MdEdit } from "../../images/Icons.js";
-import { doc, updateDoc, onSnapshot, } from "firebase/firestore";
+import { doc, updateDoc,  } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 import CaseEdit from "../CaseEdit/CaseEdit"; // Import the CaseEdit component
 
-const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
+const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
     const auth = getAuth();
     const currentUser = auth.currentUser;
     const userUID = currentUser ? currentUser.uid : null;
 
     const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
-    const listenerAttached = useRef(false);
-    const lastAlertedStatus = useRef(null); // Track the last alerted status
+    // const listenerAttached = useRef(false);
+    // const lastAlertedStatus = useRef(null); // Track the last alerted status
   
     const formatDate = (dateString) => {
         const date = new Date(dateString);
@@ -31,8 +31,8 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
   useEffect(() => {
     setFormData(fullcase);
   }, [fullcase]);
-
- // Handle Status changes
+ 
+  // Handle Status changes
   const handleStatusChange = async (newStatus) => {
     try {
       const now = new Date();
@@ -45,6 +45,16 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
         .getSeconds()
         .toString()
         .padStart(2, "0")}`;
+
+          // If the new status is "aborted", confirm with the user
+      if (newStatus === "aborted") {
+        const userConfirmed = window.confirm(
+          "Are you sure you want to abort this job?"
+        );
+        if (!userConfirmed) {
+          return; // Exit without making changes if the user cancels
+        }
+      }
   
       const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
       await updateDoc(docRef, {
@@ -52,7 +62,7 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
         UID: userUID,
         updated_at: formattedNow,
       })
-      onStatusChanged();
+      onSaveSuccess();
       setIsEditing(false); // Exit editing mode
 
       // Update the local state to reflect the status change
@@ -61,13 +71,12 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
         status: newStatus,
       }));   
 
-      // Start or stop listening based on the status
-      if (newStatus === "running") {
-        startListening();
-      } else {
-        stopListening();
-      }
-      onStatusChanged();
+      // // Start or stop listening based on the status
+      // if (newStatus === "running") {
+      //   startListening();
+      // } else {
+      //   stopListening();
+      // }
       if (newStatus !== "aborted")
         {
           alert(`Status updated to ${newStatus}`);
@@ -79,73 +88,65 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
     }
   };
 
-  const startListening = useCallback(() => {
-    if (listenerAttached.current) return; // Prevent multiple listeners
+  // const startListening = useCallback(() => {
+  //   if (listenerAttached.current) return; // Prevent multiple listeners
   
-    const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
-    const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
-        if (docSnapshot.exists()) {
-            const updatedData = docSnapshot.data();
-            setFormData(updatedData);
+  //   const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+  //   const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
+  //       if (docSnapshot.exists()) {
+  //           const updatedData = docSnapshot.data();
+  //           setFormData(updatedData);
   
-        // Check for status changes and ensure alerts are only shown once
-        if (updatedData.status !== lastAlertedStatus.current) {
-            lastAlertedStatus.current = updatedData.status; 
-            if (updatedData.status === "completed") {
-                alert("The job has been completed!");
-                lastAlertedStatus.current = "completed"; // Update last alerted status
-                onStatusChanged();
-            } else if (updatedData.status === "aborted") {
-                alert("The job has been aborted!");
-                lastAlertedStatus.current = "aborted"; // Update last alerted status
-                onStatusChanged();
-            }
-            }
-        }
-    });
+  //       // Check for status changes and ensure alerts are only shown once
+  //       if (updatedData.status !== lastAlertedStatus.current) {
+  //           lastAlertedStatus.current = updatedData.status; 
+  //           if (updatedData.status === "completed") {
+  //               alert("The job has been completed!");
+  //               lastAlertedStatus.current = "completed"; // Update last alerted status
+  //           } else if (updatedData.status === "aborted") {
+  //               alert("The job has been aborted!");
+  //               lastAlertedStatus.current = "aborted"; // Update last alerted status
+  //           }
+  //           }
+  //       }
+  //   });
   
-    listenerAttached.current = true;
+  //   listenerAttached.current = true;
   
-    // Return unsubscribe function for cleanup
-    return () => {
-      unsubscribe();
-      listenerAttached.current = false;
-    };
-  }, [pi, fullcase.id,onStatusChanged]);
+  //   // Return unsubscribe function for cleanup
+  //   return () => {
+  //     unsubscribe();
+  //     listenerAttached.current = false;
+  //   };
+  // }, [pi, fullcase.id]);
   
-  const stopListening = useCallback(() => {
-    if (listenerAttached.current) {
-      listenerAttached.current = false;
-    }
-  }, []);  
-
-  useEffect(() => {
-    if (formData.status === "running") {
-      startListening();
-    } else {
-      stopListening();
-    }
-
-    return () => {
-      stopListening();
-    };
-  }, [formData.status, startListening, stopListening]);
+  // const stopListening = useCallback(() => {
+  //   if (listenerAttached.current) {
+  //     listenerAttached.current = false;
+  //   }
+  // }, []);  
   
-  useEffect(() => {
-    let cleanupFn;
+  // useEffect(() => {
+  //   let cleanupFn;
   
-    if (formData.status === "running") {
-      cleanupFn = startListening(); // Attach listener
-    } else {
-      stopListening(); // Stop listener
-    }
+  //   if (formData.status === "running") {
+  //     cleanupFn = startListening(); // Attach listener
+  //   } else {
+  //     stopListening(); // Detach listener
+  //   }
   
-    // Cleanup listener on unmount or when status changes
-    return () => {
-      if (cleanupFn) cleanupFn();
-    };
-  }, [formData.status, startListening, stopListening]);
+  //   // Cleanup listener on unmount or when status changes
+  //   return () => {
+  //     if (cleanupFn) cleanupFn(); // Ensure listener is cleaned up
+  //   };
+  // }, [formData.status, startListening, stopListening]);
   
+  // useEffect(() => {
+  //   // Ensure proper cleanup on navigation away
+  //   return () => {
+  //     stopListening();
+  //   };
+  // }, [stopListening]);
 
     return (
         <div className="App-background">
@@ -155,7 +156,7 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
             pi={pi}
             fullcase={formData}
             onBack={() => setIsEditing(false)}
-            onStatusChanged={onStatusChanged}
+            onSaveSuccess={onSaveSuccess}
             />
         ) : (
             <div className="view-mode">
@@ -208,7 +209,10 @@ const CasePreview = ({ pi, fullcase, onBack, onStatusChanged }) => {
 
             <button
             className="back-button"
-            onClick={onBack}
+            onClick={() => {
+                // listenerAttached.current = false
+                onBack();
+            }}
             >
             Back
             </button>

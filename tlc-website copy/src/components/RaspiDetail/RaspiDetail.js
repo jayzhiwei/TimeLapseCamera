@@ -12,7 +12,7 @@ const RaspiDetail = ({pi, onBack}) => {
     const [timeLapseCases, setTimeLapseCases] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-    const [showPreviewPage, setshowPreviewPage] = useState(false);
+    const [showEditPage, setShowEditPage] = useState(false);
     const [showFilmPage, setShowFilmPage] = useState(false); // State to toggle Film component
     const [showAlbumPage, setShowAlbumPage] = useState(false); // State to toggle Album component
     const [selectedCaseId, setSelectedCaseId] = useState(null); // State to store selected case ID
@@ -63,32 +63,16 @@ const RaspiDetail = ({pi, onBack}) => {
         setTimeLapseCases(updatedCases); // Update the list
         const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
         setSelectedCaseId(updatedCase); // Update the selected case with fresh data
-        setshowPreviewPage(true); // Switch back to view mode
+        setShowEditPage(true); // Switch back to view mode
     };
 
-    const handleStatusChangedSuccess = async () => {
-        const timeLapseRef = collection(db, `raspberrys/${pi.serial}/TimeLapseCase`);
-        const timeLapseSnapshot = await getDocs(timeLapseRef);
-    
-        const updatedCases = timeLapseSnapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-        }));
-    
-        setTimeLapseCases(updatedCases); // Update the list
-        const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
-        setSelectedCaseId(updatedCase); // Update the selected case with fresh data
-        setshowPreviewPage(true); // Switch back to view mode
-    };   
-
-    if (showPreviewPage) {
+    if (showEditPage) {
         return (
             <CasePreview
             pi={pi.serial}
             fullcase={selectedCaseId}
-            onBack={() => setshowPreviewPage(false)} // Back to RaspiDetail
+            onBack={() => setShowEditPage(false)} // Back to RaspiDetail
             onSaveSuccess={handleSaveSuccess} // Pass the callback
-            onStatusChanged={handleStatusChangedSuccess}
             />
         );
     }
@@ -133,7 +117,7 @@ return (
             <div key={timeLapseCase.id} className="timelapse-item"
             onClick={() => {
                 setSelectedCaseId(timeLapseCase);
-                setshowPreviewPage(true);
+                setShowEditPage(true);
             }}>
                 <div className="timelapse-item-header">
                     <h3>{timeLapseCase.name}</h3>

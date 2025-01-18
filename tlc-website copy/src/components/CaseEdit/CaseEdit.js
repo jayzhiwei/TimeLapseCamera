@@ -69,11 +69,11 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         updatedData.UID = userUID;
         updatedData.updated_at = formattedNow;
         // console.log("Updated Data:", updatedData);
+
         const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
         await updateDoc(docRef, updatedData);
         onSaveSuccess()
         setHasChanges(false); // Disable save button
-
         onBack(); // Exit editing mode
 
         alert("Changes saved successfully!");
@@ -201,10 +201,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
             <button
                 type="button"
                 className="back-button"
-                onClick={(e) => {
-                    e.preventDefault();
-                    onBack();
-                }}
+                onClick={() => onBack()}
             >
                 Cancel
             </button>

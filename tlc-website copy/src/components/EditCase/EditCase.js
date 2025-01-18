@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useCallback, useRef  } from "react";
+import React, { useState, useEffect,  } from "react";
 import "../../App.css";
 import "./EditCase.css";
 import { getAuth } from "firebase/auth";
 import { MdEdit } from "../../images/Icons.js";
-import { doc, updateDoc, onSnapshot, } from "firebase/firestore";
+import { doc, updateDoc,  } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 
 const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
@@ -16,8 +16,8 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
   const [isEditing, setIsEditing] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
   // const [unsubscribe, setUnsubscribe] = useState(null);
-  const listenerAttached = useRef(false);
-  const lastAlertedStatus = useRef(null); // Track the last alerted status
+  // const listenerAttached = useRef(false);
+  // const lastAlertedStatus = useRef(null); // Track the last alerted status
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -70,6 +70,16 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         .getSeconds()
         .toString()
         .padStart(2, "0")}`;
+
+          // If the new status is "aborted", confirm with the user
+      if (newStatus === "aborted") {
+        const userConfirmed = window.confirm(
+          "Are you sure you want to abort this job?"
+        );
+        if (!userConfirmed) {
+          return; // Exit without making changes if the user cancels
+        }
+      }
   
       const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
       await updateDoc(docRef, {
@@ -87,12 +97,12 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         status: newStatus,
       }));   
 
-      // Start or stop listening based on the status
-      if (newStatus === "running") {
-        startListening();
-      } else {
-        stopListening();
-      }
+      // // Start or stop listening based on the status
+      // if (newStatus === "running") {
+      //   startListening();
+      // } else {
+      //   stopListening();
+      // }
       onSaveSuccess();
       if (newStatus !== "aborted")
         {
@@ -153,71 +163,71 @@ const EditCase = ({ pi, fullcase, onBack, onSaveSuccess }) => {
     }
   };
 
-  const startListening = useCallback(() => {
-    if (listenerAttached.current) return; // Avoid reattaching the listener
+  // const startListening = useCallback(() => {
+  //   if (listenerAttached.current) return; // Avoid reattaching the listener
   
-    const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
-    const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
-      if (docSnapshot.exists()) {
-        const updatedData = docSnapshot.data();
-        setFormData(updatedData);
+  //   const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+  //   const unsubscribe = onSnapshot(docRef, (docSnapshot) => {
+  //     if (docSnapshot.exists()) {
+  //       const updatedData = docSnapshot.data();
+  //       setFormData(updatedData);
   
-        // Check for status changes and ensure alerts are only shown once
-        if (updatedData.status !== lastAlertedStatus.current) {
-          if (updatedData.status === "completed") {
-            alert("The job has been completed!");
-            lastAlertedStatus.current = "completed"; // Update last alerted status
-            onSaveSuccess();
-          } else if (updatedData.status === "aborted") {
-            alert("The job has been aborted!");
-            lastAlertedStatus.current = "aborted"; // Update last alerted status
-            onSaveSuccess();
-          }
-        }
-      }
-    });
+  //       // Check for status changes and ensure alerts are only shown once
+  //       if (updatedData.status !== lastAlertedStatus.current) {
+  //         if (updatedData.status === "completed") {
+  //           alert("The job has been completed!");
+  //           lastAlertedStatus.current = "completed"; // Update last alerted status
+  //           onSaveSuccess();
+  //         } else if (updatedData.status === "aborted") {
+  //           alert("The job has been aborted!");
+  //           lastAlertedStatus.current = "aborted"; // Update last alerted status
+  //           onSaveSuccess();
+  //         }
+  //       }
+  //     }
+  //   });
   
-    // Mark the listener as attached
-    listenerAttached.current = true;
+  //   // Mark the listener as attached
+  //   listenerAttached.current = true;
   
-    // Cleanup function to detach the listener when needed
-    return () => {
-      unsubscribe();
-      listenerAttached.current = false;
-    };
-  }, [pi, fullcase.id, onSaveSuccess]);
+  //   // Cleanup function to detach the listener when needed
+  //   return () => {
+  //     unsubscribe();
+  //     listenerAttached.current = false;
+  //   };
+  // }, [pi, fullcase.id, onSaveSuccess]);
   
-  const stopListening = useCallback(() => {
-    if (listenerAttached.current) {
-      listenerAttached.current = false;
-    }
-  }, []);  
+  // const stopListening = useCallback(() => {
+  //   if (listenerAttached.current) {
+  //     listenerAttached.current = false;
+  //   }
+  // }, []);  
 
-  useEffect(() => {
-    if (formData.status === "running") {
-      startListening();
-    } else {
-      stopListening();
-    }
+  // useEffect(() => {
+  //   if (formData.status === "running") {
+  //     startListening();
+  //   } else {
+  //     stopListening();
+  //   }
 
-    return () => {
-      stopListening();
-    };
-  }, [formData.status, startListening, stopListening]);
+  //   return () => {
+  //     stopListening();
+  //   };
+  // }, [formData.status, startListening, stopListening]);
   
-  useEffect(() => {
-    let cleanupFn;
-    if (formData.status === "running") {
-      cleanupFn = startListening();
-    } else {
-      stopListening();
-    }
+  // useEffect(() => {
+  //   let cleanupFn;
+  //   if (formData.status === "running") {
+  //     cleanupFn = startListening();
+  //   } else {
+  //     stopListening();
+  //   }
   
-    // Cleanup the listener when component unmounts or status changes
-    return () => {
-      if (cleanupFn) cleanupFn();
-    };
-  }, [formData.status, startListening, stopListening]);
+  //   // Cleanup the listener when component unmounts or status changes
+  //   return () => {
+  //     if (cleanupFn) cleanupFn();
+  //   };
+  // }, [formData.status, startListening, stopListening]);
   
   return (
     <div className="App-background">
