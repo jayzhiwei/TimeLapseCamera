@@ -31,13 +31,14 @@
   .image-grid {
     display: flex;
     flex-wrap: wrap; /* Allow images to wrap */
-    gap: 15px; /* Space between images */
+    gap: 1px; /* Space between images */
     justify-content: center; /* Center the images */
+    
   }
   
   .album-image {
-    width: 50%; /* Fixed width for images */
-    height: 5%; /* Fixed height for images */
+    width: 100%; /* Fixed width for images */
+    height: 100%; /* Fixed height for images */
     object-fit: cover; /* Maintain aspect ratio and crop if necessary */
     border: 2px solid #ccc; /* Light grey border */
     border-radius: 10px; /* Rounded corners */
@@ -57,3 +58,22 @@
     margin-top: 20px;
   }
   
+  .image-container {
+    margin: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    text-align: center;
+    height: fit-content;
+  }
+  
+  .image-metadata {
+    margin-top: 8px;
+    font-size: 14px;
+    color: #cdcad4;
+
+    p {
+      margin: 4px 0;
+    }
+  }
+ 
