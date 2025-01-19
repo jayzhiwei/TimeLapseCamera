@@ -7,6 +7,7 @@ import Film from './components/Film/Film';
 import Home from './pages/Home/Home';
 import PairDevices from './pages/PairDevices/PairDevices';
 import FolderContent from './pages/FolderContent';
+import LoginSignUp from './pages/LoginSignUp/LoginSignUp'
 import { UserProvider, UserContext } from './components/UserContext'; // Import UserContext here
 import { auth } from './firebase/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
@@ -42,12 +43,13 @@ function AppContent() {
       <Navbar />
       <div className='container'>
         <Routes>
-          <Route path='/' element={<Home />} />
+          <Route path='/' element={<LoginSignUp isSignedIn={!isSignedIn} />} />
           <Route path='/album' element={<Albums />} />
           <Route path='/film' element={<Film />} />
           <Route path='/about' element={<About />} />
           <Route path='/PairDevices' element={<PairDevices />} />
           <Route path='/folder/:id' element={<FolderContent isSignedIn={isSignedIn} />} />
+          <Route path='/home' element={<Home />} />
         </Routes>
       </div>
     </>

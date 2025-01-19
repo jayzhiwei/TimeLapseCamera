@@ -25,13 +25,13 @@ h2{
     background-color: #f7f7f7;
   }
   
-  .google-logo {
+  /* .google-logo {
     width: 20px;
     height: 20px;
     margin-right: 10px;
-  }
+  } */
   
-  .login-container {
+  /* .login-container {
     width: 300px;
     margin: auto;
     padding: 20px;
@@ -39,18 +39,18 @@ h2{
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     text-align: center;
-  }
+  } */
   
-  .login-input {
+  /* .login-input {
     width: 100%;
     padding: 10px;
     margin-bottom: 10px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 16px;
-  }
+  } */
   
-  .login-button {
+  /* .login-button {
     background-color: #4CAF50;
     color: white;
     padding: 10px;
@@ -59,7 +59,7 @@ h2{
     border-radius: 4px;
     cursor: pointer;
     font-size: 16px;
-  }
+  } */
   
   .logout-button {
     background-color: #f44336;
@@ -72,12 +72,12 @@ h2{
     font-size: 16px;
   }
   
-  .toggle-text {
+  /* .toggle-text {
     color: #007BFF;
     cursor: pointer;
     text-decoration: underline;
     margin-top: 10px;
-  }
+  } */
 
   .profile-picture-upload {
     display: flex;
