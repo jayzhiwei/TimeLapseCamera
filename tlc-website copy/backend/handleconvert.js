@@ -1,10 +1,11 @@
 const express = require("express");
-const ffmpeg = require("fluent-ffmpeg");
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
 const cors = require('cors');
+const ffmpeg = require("fluent-ffmpeg");
+ffmpeg.setFfmpegPath('C:\\ffmpeg\\bin\\ffmpeg.exe');
 
 const app = express();
 app.use(express.json());
@@ -12,10 +13,22 @@ app.use(cors());
 
 app.use(
     cors({
-      origin: 'http://localhost:3000', // Allow requests only from your frontend
-      methods: ['GET', 'POST', 'OPTIONS'], // Specify allowed HTTP methods
+      origin: (origin, callback) => {
+        console.log('Requested Origin:', origin); // Log the origin of the request
+        if ([
+            'http://localhost:3000', 
+            'https://greatworld.timelapse2025.com',
+            'http://greatworld.timelapse2025.com',
+        ].includes(origin)) {
+          callback(null, true);
+        } else {
+          callback(new Error('Not allowed by CORS'));
+        }
+      },
+      methods: ['GET', 'POST', 'OPTIONS'],
     })
   );
+  
 
 // Create temp directory if it doesn't exist
 const tempDir = path.join(__dirname, "temp");
@@ -43,6 +56,10 @@ const resolutionMap = {
 app.post("/convert", async (req, res) => {
   const { imageUrls, fps, resolution } = req.body;
 
+  // Log the received data
+  console.log(`Received ${imageUrls.length} image URLs:`);
+  imageUrls.forEach((url, index) => console.log(`Image ${index + 1}: ${url}`));
+
   if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
     return res.status(400).json({ error: "No image URLs provided." });
   }
@@ -61,7 +78,7 @@ app.post("/convert", async (req, res) => {
     const downloadedFiles = [];
     for (let i = 0; i < imageUrls.length; i++) {
       const imageUrl = imageUrls[i];
-      const localFilePath = path.join(tempDir, `image_${i}.jpg`);
+      const localFilePath = path.join(tempDir, `image_${String(i).padStart(3, '0')}.jpg`);
 
       const response = await axios({
         url: imageUrl,
@@ -83,27 +100,29 @@ app.post("/convert", async (req, res) => {
     // Step 2: Convert images to video with user-defined FPS and resolution
     const outputVideoPath = path.join(tempDir, `${uuidv4()}.mp4`);
     const ffmpegCommand = ffmpeg();
-
-    downloadedFiles.forEach((file) => ffmpegCommand.addInput(file));
-
     ffmpegCommand
-      .on("end", () => {
+    .input(path.join(tempDir, 'image_%03d.jpg')) // Use sequence pattern
+    .inputOptions([
+        `-framerate ${fps}`, // Set the input frame rate
+      ])
+    .on("end", () => {
         res.download(outputVideoPath, "output.mp4", (err) => {
-          cleanupFiles([...downloadedFiles, outputVideoPath]);
-          if (err) console.error("Error sending file:", err);
+        cleanupFiles([...downloadedFiles, outputVideoPath]);
+        if (err) console.error("Error sending file:", err);
         });
-      })
-      .on("error", (err) => {
+    })
+    .on("error", (err) => {
         console.error("FFmpeg error:", err);
         cleanupFiles([...downloadedFiles, outputVideoPath]);
         res.status(500).json({ error: "Failed to generate video." });
-      })
-      .outputOptions([
+    })
+    .outputOptions([
         `-r ${fps}`, // Set frame rate
         `-vf scale=${width}:${height}`, // Set resolution
         "-pix_fmt yuv420p", // Pixel format for compatibility
-      ])
-      .save(outputVideoPath);
+    ])
+    .save(outputVideoPath);
+
   } catch (error) {
     console.error("Error processing images:", error);
     res.status(500).json({ error: "An error occurred while processing the images." });

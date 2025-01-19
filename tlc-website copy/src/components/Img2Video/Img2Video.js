@@ -49,9 +49,9 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
     try {
       setUploadStatus("Converting images to video...");
       const response = await axios.post(
-        "http://localhost:5000/convert",
+        "https://timelapse2025.com/convert",
         {
-          urls, // Use passed imageUrls
+          imageUrls: urls, // Use passed imageUrls
           fps,
           resolution,
         },
