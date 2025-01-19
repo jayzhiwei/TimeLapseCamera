@@ -91,6 +91,7 @@ const RaspiDetail = ({pi, onBack}) => {
             <Album
             pi={pi.serial}
             caseId={selectedCaseId.id}
+            caseName={selectedCaseId.name}
             onBack={() => setShowAlbumPage(false)} // Back to RaspiDetail
             />
         );
@@ -101,6 +102,7 @@ const RaspiDetail = ({pi, onBack}) => {
             <Film
             pi={pi.serial}
             caseId={selectedCaseId.id}
+            caseName={selectedCaseId.name}
             onBack={() => setShowFilmPage(false)} // Back to RaspiDetail
             />
         );

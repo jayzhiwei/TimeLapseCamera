@@ -4,7 +4,7 @@ import "../../App.css";
 import "./Film.css";
 import { getAuth } from "firebase/auth";
 
-const Film = ({ pi, caseId, onBack }) => {
+const Film = ({ pi, caseId, caseName, onBack }) => {
   const [videoUrls, setVideoUrls] = useState([]); // Store video URLs
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -63,8 +63,9 @@ const Film = ({ pi, caseId, onBack }) => {
   return (
     <div className="App-background">
       <h1>Film Page</h1>
-      <p>Displaying Film for Case ID: <strong>{caseId}</strong></p>
-      <p>Device Serial: <strong>{pi}</strong></p>
+      {/* <p>Displaying Film for Case ID: <strong>{caseId}</strong></p>
+      <p>Device Serial: <strong>{pi}</strong></p> */}
+      <p><strong>{caseName}</strong></p>
 
       <button className="back-button" onClick={onBack}>
         Back

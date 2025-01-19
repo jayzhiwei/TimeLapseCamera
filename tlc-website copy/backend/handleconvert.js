@@ -8,72 +8,84 @@ const { v4: uuidv4 } = require("uuid");
 const app = express();
 app.use(express.json());
 
-// Temporary folder to store downloaded images
-const tempFolder = path.join(__dirname, "temp");
-if (!fs.existsSync(tempFolder)) {
-  fs.mkdirSync(tempFolder);
+// Create temp directory if it doesn't exist
+const tempDir = path.join(__dirname, "temp");
+if (!fs.existsSync(tempDir)) {
+  fs.mkdirSync(tempDir);
 }
 
-// Route to handle image-to-video conversion
+// Utility function for cleaning up files
+const cleanupFiles = (files) => {
+  files.forEach((file) => {
+    if (fs.existsSync(file)) fs.unlinkSync(file);
+  });
+};
+
+// Route to convert images to video
 app.post("/convert", async (req, res) => {
-  const { imageUrls } = req.body;
+  const { imageUrls, fps, resolution } = req.body;
 
   if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
     return res.status(400).json({ error: "No image URLs provided." });
   }
 
+  // Validate resolution
+  if (!/^\d+x\d+$/.test(resolution)) {
+    return res.status(400).json({ error: "Invalid resolution format. Use 'WIDTHxHEIGHT' (e.g., '1920x1080')." });
+  }
+
   try {
-    // Step 1: Download images to a temporary directory
-    const downloadedImages = [];
-    for (const [index, url] of imageUrls.entries()) {
-      const imagePath = path.join(tempFolder, `image_${index}.jpg`);
+    const [width, height] = resolution.split("x").map(Number);
+
+    // Step 1: Download images
+    const downloadedFiles = [];
+    for (let i = 0; i < imageUrls.length; i++) {
+      const imageUrl = imageUrls[i];
+      const localFilePath = path.join(tempDir, `image_${i}.jpg`);
+
       const response = await axios({
-        url,
+        url: imageUrl,
         method: "GET",
         responseType: "stream",
       });
-      const writer = fs.createWriteStream(imagePath);
+
+      const writer = fs.createWriteStream(localFilePath);
       response.data.pipe(writer);
 
-      // Wait for the download to finish
       await new Promise((resolve, reject) => {
         writer.on("finish", resolve);
         writer.on("error", reject);
       });
 
-      downloadedImages.push(imagePath);
+      downloadedFiles.push(localFilePath);
     }
 
-    // Step 2: Convert downloaded images to a video
-    const outputVideoPath = path.join(tempFolder, `${uuidv4()}.mp4`);
+    // Step 2: Convert images to video with user-defined FPS and resolution
+    const outputVideoPath = path.join(tempDir, `${uuidv4()}.mp4`);
     const ffmpegCommand = ffmpeg();
 
-    downloadedImages.forEach((image) => {
-      ffmpegCommand.addInput(image);
-    });
+    downloadedFiles.forEach((file) => ffmpegCommand.addInput(file));
 
     ffmpegCommand
       .on("end", () => {
-        // Step 3: Send the generated video file to the client
         res.download(outputVideoPath, "output.mp4", (err) => {
-          // Clean up temporary files
-          downloadedImages.forEach((image) => fs.unlinkSync(image));
-          fs.unlinkSync(outputVideoPath);
-          if (err) {
-            console.error("Error sending file:", err);
-          }
+          cleanupFiles([...downloadedFiles, outputVideoPath]);
+          if (err) console.error("Error sending file:", err);
         });
       })
       .on("error", (err) => {
         console.error("FFmpeg error:", err);
+        cleanupFiles([...downloadedFiles, outputVideoPath]);
         res.status(500).json({ error: "Failed to generate video." });
-        // Clean up on error
-        downloadedImages.forEach((image) => fs.unlinkSync(image));
       })
-      .outputOptions(["-r 30", "-pix_fmt yuv420p"]) // Set frame rate and pixel format
+      .outputOptions([
+        `-r ${fps}`, // Set frame rate
+        `-vf scale=${width}:${height}`, // Set resolution
+        "-pix_fmt yuv420p", // Pixel format for compatibility
+      ])
       .save(outputVideoPath);
   } catch (error) {
-    console.error("Error during processing:", error);
+    console.error("Error processing images:", error);
     res.status(500).json({ error: "An error occurred while processing the images." });
   }
 });
@@ -81,5 +93,5 @@ app.post("/convert", async (req, res) => {
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
+  console.log(`Server running on port ${PORT}`);
 });

@@ -94,12 +94,12 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                 </label>
                 {key === "resolution" && (
                 <select id={key} name={key} value={formData[key] || ""} onChange={handleChange}>
-                    <option value="Max_View">12 MP</option>
-                    <option value="4K_UHD">4K UHD</option>
-                    <option value="2K_UHD">2K UHD</option>
-                    <option value="1080p">1080p Full HD</option>
-                    <option value="720p">720p HD</option>
-                    <option value="SD_480p">480p SD</option>
+                    <option value="Max_View">12MP (4056x3040)</option>
+                    <option value="4K_UHD">4K UHD (3840x2160)</option>
+                    <option value="2K_UHD">2K UHD (2560x1440)</option>
+                    <option value="1080p">1080p Full HD (1920x1080)</option>
+                    <option value="720p">720p HD (1280x720)</option>
+                    <option value="SD_480p">480p SD (640x480)</option>
                 </select>
                 )}
                 {/* {key === "status" && (
