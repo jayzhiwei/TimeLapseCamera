@@ -42,13 +42,16 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
     }
   }, [imageURLs]);  
   
+  const urls = imageURLs.map((image) => image.url);
+  // console.log(urls)
+
   const handleConvertToVideo = async () => {
     try {
       setUploadStatus("Converting images to video...");
       const response = await axios.post(
         "http://localhost:5000/convert",
         {
-          imageURLs, // Use passed imageUrls
+          urls, // Use passed imageUrls
           fps,
           resolution,
         },

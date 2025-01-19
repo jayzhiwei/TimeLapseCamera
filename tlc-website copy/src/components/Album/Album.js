@@ -53,7 +53,13 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
             return { url, metadata };
           })
         );
-        setImages(filesWithMetadata);
+
+      // Sort files by name (timestamps 'YYYYMMDD_HHMMSS')
+      const sortedFiles = filesWithMetadata.sort((a, b) =>
+        a.metadata.name.localeCompare(b.metadata.name)
+      );
+
+        setImages(sortedFiles);
       } catch (err) {
         setError("Failed to fetch images or metadata.");
         console.error(err);

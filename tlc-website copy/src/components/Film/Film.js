@@ -25,7 +25,7 @@ const Film = ({ pi, caseId, caseName, onBack }) => {
 
       const storage = getStorage();
       const folderPath = `films/${userUID}/${pi}/${caseId}/`; // Update this path to match your storage structure
-      console.log("Fetching films from:", folderPath);
+      // console.log("Fetching films from:", folderPath);
       const folderRef = ref(storage, folderPath);
 
       try {

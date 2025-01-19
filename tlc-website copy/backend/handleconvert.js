@@ -4,9 +4,18 @@ const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
 const { v4: uuidv4 } = require("uuid");
+const cors = require('cors');
 
 const app = express();
 app.use(express.json());
+app.use(cors());
+
+app.use(
+    cors({
+      origin: 'http://localhost:3000', // Allow requests only from your frontend
+      methods: ['GET', 'POST', 'OPTIONS'], // Specify allowed HTTP methods
+    })
+  );
 
 // Create temp directory if it doesn't exist
 const tempDir = path.join(__dirname, "temp");
@@ -21,6 +30,15 @@ const cleanupFiles = (files) => {
   });
 };
 
+const resolutionMap = {
+    "Max_View": "4056x3040",
+    "4K_UHD": "3840x2160",
+    "2K_UHD": "2560x1440",
+    "1080p": "1920x1080",
+    "720p": "1280x720",
+    "SD_480p": "640x480",
+  };
+
 // Route to convert images to video
 app.post("/convert", async (req, res) => {
   const { imageUrls, fps, resolution } = req.body;
@@ -29,13 +47,15 @@ app.post("/convert", async (req, res) => {
     return res.status(400).json({ error: "No image URLs provided." });
   }
 
+  const resolutionValue = resolutionMap[resolution] || resolution;
+
   // Validate resolution
-  if (!/^\d+x\d+$/.test(resolution)) {
+  if (!/^\d+x\d+$/.test(resolutionValue)) {
     return res.status(400).json({ error: "Invalid resolution format. Use 'WIDTHxHEIGHT' (e.g., '1920x1080')." });
   }
 
   try {
-    const [width, height] = resolution.split("x").map(Number);
+    const [width, height] = resolutionValue.split("x").map(Number);
 
     // Step 1: Download images
     const downloadedFiles = [];

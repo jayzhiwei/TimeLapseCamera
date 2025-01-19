@@ -16,7 +16,7 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
       const hours = date.getHours().toString().padStart(2, "0");
       const minutes = date.getMinutes().toString().padStart(2, "0");
       const seconds = date.getSeconds().toString().padStart(2, "0");
-      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
   };
 
     const now = useMemo(() => new Date(), []);
@@ -101,6 +101,7 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
                 // UID: userUID,
                 createdStandby: serverTimestamp(),
                 updated_at: formattedNow,
+                statusUpdated_at: null
             };
 
             const timeLapseRef = collection(db, `raspberrys/${pi}/TimeLapseCase`);

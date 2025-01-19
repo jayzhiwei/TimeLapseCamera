@@ -1,16 +1,16 @@
 import React, { useState, useEffect, } from "react";
 import "../../App.css";
 import "./CasePreview.css";
-import { getAuth } from "firebase/auth";
+// import { getAuth } from "firebase/auth";
 import { MdEdit } from "../../images/Icons.js";
 import { doc, updateDoc,  } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 import CaseEdit from "../CaseEdit/CaseEdit"; // Import the CaseEdit component
 
 const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    const userUID = currentUser ? currentUser.uid : null;
+    // const auth = getAuth();
+    // const currentUser = auth.currentUser;
+    // const userUID = currentUser ? currentUser.uid : null;
 
     const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
@@ -25,7 +25,7 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         const hours = date.getHours().toString().padStart(2, "0");
         const minutes = date.getMinutes().toString().padStart(2, "0");
         const seconds = date.getSeconds().toString().padStart(2, "0");
-        return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
+        return `${day}-${month}-${year} at ${hours}:${minutes}:${seconds}`;
     };
 
   useEffect(() => {
@@ -46,7 +46,17 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         .toString()
         .padStart(2, "0")}`;
 
-          // If the new status is "aborted", confirm with the user
+      // If the new status is "running", confirm with the user
+      if (newStatus === "running") {
+        const userConfirmed = window.confirm(
+          "Start this job?"
+        );
+        if (!userConfirmed) {
+          return; // Exit without making changes if the user cancels
+        }
+      }
+
+      // If the new status is "aborted", confirm with the user
       if (newStatus === "aborted") {
         const userConfirmed = window.confirm(
           "Are you sure you want to abort this job?"
@@ -59,8 +69,8 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
       const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
       await updateDoc(docRef, {
         status: newStatus,
-        UID: userUID,
-        updated_at: formattedNow,
+        // UID: userUID,
+        statusUpdated_at: formattedNow,
       })
       onSaveSuccess();
       setIsEditing(false); // Exit editing mode
@@ -166,7 +176,8 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
             >
             <MdEdit/>
             </button>
-
+            
+            <p>Status Updated at: {fullcase.statusUpdated_at}</p>
             <p>Status: {fullcase.status}</p>
             <p>
             {fullcase.captureTime ? (() => {
@@ -201,7 +212,7 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
             <button
                 className="stop-button"
                 onClick={() => handleStatusChange("aborted")}
-                disabled={["aborted", "completed"].includes(fullcase.status)}
+                disabled={["aborted", "completed", "standby"].includes(fullcase.status)}
             >
                 Stop
             </button>
