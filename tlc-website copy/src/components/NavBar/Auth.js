@@ -11,7 +11,6 @@ const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelap
 
 const Auth = () => {
     const [ authenticatedUser, setAuthenticatedUser ] = useState("");
-    const [ error, setError ] = useState("");
     const { userProfile } = useContext(UserContext);
 
     // Check if user authenticated
@@ -32,7 +31,7 @@ const Auth = () => {
     const userSignOut = () => {
         signOut(auth).then(() => {
             console.log("User sign out");
-        }).catch(error => setError("Sign out error"))
+        }).catch(error => "Sign out error")
     }
 
     return (
@@ -48,10 +47,10 @@ const Auth = () => {
             )}
 
             { authenticatedUser === null ?
-                <Link herf="/login" />:
-                <Link herf="/" onClick = {userSignOut} className="icons">
+                <CustomLink to="/" />:
+                <CustomLink to="/" onClick = {userSignOut} className="icons">
                     <VscSignOut />
-                </Link>
+                </CustomLink>
             }
         </nav>
     );
