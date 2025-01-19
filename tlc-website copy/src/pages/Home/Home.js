@@ -1,19 +1,18 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
-import { auth, storage } from '../../firebase/firebase';
+import { onAuthStateChanged, updateProfile } from "firebase/auth";
+import { auth, storage, db } from '../../firebase/firebase';
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import { UserContext } from '../../components/UserContext';
+import ErrorMsg from '../../components/ErrorMsg/ErrorMsg.js';
 import '../../App.css';
 import './Home.css';
 import MyDevices from '../../components/MyDevices/MyDevices.js';
-import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 
-const db = getFirestore();
 const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=4f577cb6-cb51-4001-88c8-5b06ae63490e';
 
 function Home() {
   const [error, setError] = useState(null);
-  const [isSignedIn, setIsSignedIn] = useState(false);
   const {userProfile, setUserProfile } = useContext(UserContext);
   const [selectedFile, setSelectedFile] = useState(null);
   const [isEditingProfilePicture, setIsEditingProfilePicture] = useState(false);
@@ -54,72 +53,6 @@ function Home() {
       setError("Error updating name: " + error.message);
     }
   };
-  
-  // Google Sign-In
-  // const handleGoogleSignIn = () => {
-  //   const provider = new GoogleAuthProvider();
-  //   signInWithPopup(auth, provider)
-  //     .then(async(result) => {
-  //       const user = result.user;
-  //       setUserProfile({
-  //         name: user.displayName,
-  //         imageUrl: user.photoURL || defaultProfileImage, // Use default if no profile picture
-  //       });
-  //       setIsSignedIn(true);
-  //       setError(null);
-  //       // Check if user document exists, if not create it
-  //       const userDocRef = doc(db, "users", user.uid);
-  //       const userDocSnap = await getDoc(userDocRef);
-  //       if (!userDocSnap.exists()) {
-  //         await setDoc(userDocRef, {
-  //           email: user.email,
-  //           name: user.displayName || "New User",
-  //           createdAt: new Date(),
-  //         });
-
-  //         setUserProfile({
-  //           name: user.displayName,
-  //           imageUrl: user.photoURL || defaultProfileImage,
-  //         });
-
-  //         console.log("New user document created.");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error signing in:", error);
-  //       setError("Error signing in " + error.message);
-  //     });
-  // };
-
-  // Email/Password Sign-In
-  // const handleEmailSignIn = () => {
-  //   signInWithEmailAndPassword(auth, email, password)
-  //     .then(async(result) => {
-  //       const user = result.user;
-  //       if (user.emailVerified) {
-  //         setUserProfile({
-  //           name: user.displayName,
-  //           imageUrl: user.photoURL || defaultProfileImage, // Use default if no profile picture
-  //         });
-  //         setIsSignedIn(true);
-  //         setError(null);
-
-  //         setUserProfile({
-  //           name: user.displayName,
-  //           imageUrl: user.photoURL || defaultProfileImage,
-  //         });
-
-  //       } else {
-  //         setError("Please verify your email before signing in.");
-  //       }
-  //     })
-  //     .catch((error) => {
-  //       console.error("Error signing in:", error);
-  //       setError("Error signing in: " + error.message);
-  //     });
-  // };
-
- 
 
   // Handle Profile Picture Change
   const handleFileChange = (e) => {
@@ -193,7 +126,6 @@ function Home() {
               console.error("User document does not exist in Firestore.");
             }
   
-            setIsSignedIn(true);
             setError(null);
           } catch (error) {
             console.error("Error fetching user data from Firestore:", error);
@@ -203,7 +135,6 @@ function Home() {
           setError("Please verify your email before signing in.");
         }
       } else {
-        setIsSignedIn(false);
         setUserProfile({ name: '', imageUrl: '' });
       }
     });
@@ -211,14 +142,14 @@ function Home() {
     return () => unsubscribe();
   }, [setUserProfile]);
 
+  const handleUserInfoVisibility = () => {
 
+  };
 
   return (
     <div className="App-background">
-      {/* {error && <div className="error">{error}</div>} */}
-      
+      <ErrorMsg error={error} />
         <div>
-
           <div className="user-info">
             <img src={userProfile.imageUrl} 
             alt={userProfile.name} 
@@ -274,7 +205,9 @@ function Home() {
             </div>
           )}
         </div>
-      <MyDevices />
+        <div className="myDevices-component">
+          <MyDevices />
+        </div>
     </div>
   );
 }

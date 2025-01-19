@@ -3,8 +3,7 @@ import { auth, db } from '../../firebase/firebase';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
 import ErrorMsg from '../ErrorMsg/ErrorMsg';
-import Login from '../UserLogin/Login';
-// import '../../pages/LoginSignUp/LoginSignUp.css'
+import Login from './Login';
 
 const Register = () => {
     const [error, setError] = useState(null);
@@ -146,6 +145,7 @@ const Register = () => {
                         </div>
 
                         <button
+                            className='loginSignUpbutton'
                             onClick={handleEmailSignUp}
                             disabled={
                                 !isValidEmail(email) || password.length < 6 || confirmPassword !== password
