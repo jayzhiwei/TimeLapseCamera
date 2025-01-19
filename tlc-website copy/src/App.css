@@ -10,12 +10,12 @@
   }
 
 .App-background {
-  background-color: #282c34;
+  background-color: #282c34 !important;
   display: flex;
   height: 100%;
-  flex-direction: column;
-  /* align-items: center;
-  justify-content: center; */
+  flex-direction: row;
+  /* align-items: center; */
+  /* justify-content: center; */
   color: white;
   min-height: 94.94vh;
   top: 0;

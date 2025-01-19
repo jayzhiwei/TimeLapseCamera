@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
-import "../../App.css";
 import "./RaspiDetail.css";
 import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
 import EditCase from "../EditCase/EditCase.js"
@@ -82,7 +81,7 @@ const formatDate = (dateString) => {
     }
 
 return (
-    <div className="App-background">
+    <header>
         {/* <p><strong>Serial Number:</strong> {pi.serial}</p> */}
 
         {error && <p className="error">{error}</p>}
@@ -163,7 +162,7 @@ return (
           ))}
         </div>
       )}
-    </div>
+    </header>
   );
 }
 // }

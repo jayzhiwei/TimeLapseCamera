@@ -1,10 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
 import { auth, db } from '../../firebase/firebase';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import ErrorMsg from '../ErrorMsg/ErrorMsg';
-import SignUp from '../UserRegister/Register';
+import SignUp from './Register';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -12,9 +12,22 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState(null);
     const [isRegistering, setIsRegistering] = useState(false);
+    // const  [isLoggedIn, setIsLoggedIn] = useState(false);
 
     const isValidEmail = (email) => {const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);};
+
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //         if(user)
+    //             navigate('/home');
+    //         else
+    //             navigate('/');
+    //     });
+    
+    //     // Cleanup subscription on unmount
+    //     return () => unsubscribe();
+    // }, []);
 
     // Google Sign-In
     const handleGoogleSignIn = () => {
@@ -91,6 +104,7 @@ const Login = () => {
                         </div>
                     
                         <button
+                            className='loginSignUpbutton'
                             onClick={handleEmailSignIn}
                             disabled={!isValidEmail(email) || password.length < 6}
                             style={{
@@ -117,9 +131,6 @@ const Login = () => {
             ) : (
                 <SignUp />
             )}
-            
-
-
         </div>
         
     );
