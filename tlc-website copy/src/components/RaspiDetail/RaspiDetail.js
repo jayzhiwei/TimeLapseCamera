@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../../firebase/firebase.js";
-import "../../App.css";
+import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
 import "./RaspiDetail.css";
 import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
 import CasePreview from "../CasePreview/CasePreview.js"
@@ -119,7 +118,7 @@ const RaspiDetail = ({pi, onBack}) => {
     }
 
 return (
-    <div className="App-background">
+    <header>
         {/* <p><strong>Serial Number:</strong> {pi.serial}</p> */}
 
         {error && <p className="error">{error}</p>}
@@ -215,7 +214,7 @@ return (
           ))}
         </div>
       )}
-    </div>
+    </header>
   );
 }
 // }
