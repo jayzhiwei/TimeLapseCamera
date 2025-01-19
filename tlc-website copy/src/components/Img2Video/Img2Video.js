@@ -2,6 +2,9 @@ import React, { useState, useEffect } from "react";
 import "../../App.css";
 import "./Img2Video.css";
 import axios from "axios";
+import { getStorage, ref, uploadBytesResumable, updateMetadata } from "firebase/storage";
+import { getAuth } from "firebase/auth";
+import { GrLinkPrevious, FaImage, FaFilm } from "../../images/Icons.js"
 
 const resolutions = {
   "Max_View": { label: "12MP (4056x3040)", rank: 6 },
@@ -13,10 +16,14 @@ const resolutions = {
 };
 
 const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
-  const [uploadStatus, setUploadStatus] = useState("");
-  const [fps, setFps] = useState(30); // Default FPS
-  const [resolution, setResolution] = useState(""); // Default resolution
-  const [availableResolutions, setAvailableResolutions] = useState([]);
+    const [uploadStatus, setUploadStatus] = useState("");
+    const [fps, setFps] = useState(30); // Default FPS
+    const [resolution, setResolution] = useState(""); // Default resolution
+    const [availableResolutions, setAvailableResolutions] = useState([]);
+    const [customName, setCustomName] = useState("")
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+    const userUID = currentUser ? currentUser.uid : null;
   // console.log(imageURLs[0].metadata.customMetadata.Resolution)
 
   useEffect(() => {
@@ -45,33 +52,83 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
   const urls = imageURLs.map((image) => image.url);
   // console.log(urls)
 
-  const handleConvertToVideo = async () => {
+  const now = new Date();
+  const formattedNow = `${now.getFullYear()}-${(now.getMonth() + 1)
+    .toString()
+    .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now
+    .getHours()
+    .toString()
+    .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
+    .getSeconds()
+    .toString()
+    .padStart(2, "0")}`;
+
+  const fileName = `video_${formattedNow.replace(/-/g, "").replace(/:/g, "").replace(/ /g, "_")}.mp4`;
+
+  const handleVideoConversion = async (saveToCloud = false, download = true) => {
     try {
       setUploadStatus("Converting images to video...");
       const response = await axios.post(
-        "https://timelapse2025.com/convert",
+        `${process.env.REACT_APP_API_URL}/convert`,
         {
           imageUrls: urls, // Use passed imageUrls
           fps,
           resolution,
+          fileName,
         },
         {
-          responseType: "blob", // Handle video file download
+          responseType: "arraybuffer", // Handle video file download
         }
       );
       
-      setUploadStatus("Downloading video...");
-      const videoUrl = window.URL.createObjectURL(new Blob([response.data]));
-      const link = document.createElement("a");
-      link.href = videoUrl;
-      link.setAttribute("download", "output.mp4");
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      setUploadStatus("Video downloaded successfully!");
+      setUploadStatus("Video generated successfully!");
+      const videoBlob = new Blob([response.data], { type: "video/mp4" });
+
+      // Download the video
+      if (download) {
+        const videoUrl = URL.createObjectURL(videoBlob);
+        const link = document.createElement("a");
+        link.href = videoUrl;
+        link.setAttribute("download", fileName);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      }
+
+      // Upload to Firebase Storage
+      if (saveToCloud) {
+        setUploadStatus("Uploading video to the cloud...");
+        const storage = getStorage();
+        const storageRef = ref(storage, `films/${userUID}/${pi}/${caseId}/${fileName}`);
+        const uploadTask = uploadBytesResumable(storageRef, videoBlob, {
+          contentType: "video/mp4", // Explicitly set the MIME type
+        });
+
+        uploadTask.on(
+          "state_changed",
+          (snapshot) => {
+            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+            setUploadStatus(`Upload is ${progress.toFixed(2)}% done`);
+          },
+          (error) => {
+            console.error("Upload failed:", error);
+            setUploadStatus("An error occurred while uploading the video.");
+          },
+          async () => {
+            const metadata = {
+              customMetadata: {
+                name: customName || "Untitled",
+                resolution: resolutions[resolution]?.label || resolution,
+              },
+            };
+            await updateMetadata(storageRef, metadata);
+            setUploadStatus("Video uploaded to the cloud successfully!");
+          }
+        );
+      }
     } catch (error) {
-      console.error("Error converting images to video:", error);
-      setUploadStatus("Error converting images to video.");
+      console.error("Error processing video:", error);
+      setUploadStatus("An error occurred while processing the video.");
     }
   };
 
@@ -82,12 +139,27 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
       {/* <p>Case ID: <strong>{caseId}</strong></p>
       <p>Device Serial: <strong>{pi}</strong></p> */}
       <div className="settings">
+      <label>
+          File Name:
+          <input
+            type="text"
+            value={customName}
+            onChange={(e) => setCustomName(e.target.value)}
+            placeholder="Enter a custom name for the video"
+          />
+        </label>
+
         <label>
-          FPS: 
+          Frame per second (FPS): 
           <input
             type="number"
             value={fps}
-            onChange={(e) => setFps(e.target.value)}
+            onChange={(e) => {
+              let value = e.target.value;
+              if (value >= 1 && value <= 60) {
+                setFps(value);
+              }
+            }}
             min="1"
             max="60"
           />
@@ -104,12 +176,13 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
             </select>
         </label>
       </div>
-      <button className="convert-button" onClick={handleConvertToVideo}>
-        Convert to Video
-      </button>
-      <button className="back-button" onClick={onBack}>
-        Back
-      </button>
+
+      <div className="button-group">
+        <button onClick={() => handleVideoConversion(false, true)}>Download</button>
+        <button onClick={() => handleVideoConversion(true, true)}>Download and Keep in Cloud</button>
+        <button onClick={() => handleVideoConversion(true, false)}>Keep in Cloud Only</button>
+        <button onClick={onBack}>Back</button>
+      </div>
       {uploadStatus && <p>{uploadStatus}</p>}
     </div>
   );

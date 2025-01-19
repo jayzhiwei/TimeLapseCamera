@@ -17,8 +17,8 @@ app.use(
         console.log('Requested Origin:', origin); // Log the origin of the request
         if ([
             'http://localhost:3000', 
-            'https://greatworld.timelapse2025.com',
-            'http://greatworld.timelapse2025.com',
+            'https://www.timelapse2025.com',
+            'http://www.timelapse2025.com',
         ].includes(origin)) {
           callback(null, true);
         } else {
@@ -54,11 +54,11 @@ const resolutionMap = {
 
 // Route to convert images to video
 app.post("/convert", async (req, res) => {
-  const { imageUrls, fps, resolution } = req.body;
+  const { imageUrls, fps, resolution, fileName } = req.body;
 
   // Log the received data
-  console.log(`Received ${imageUrls.length} image URLs:`);
-  imageUrls.forEach((url, index) => console.log(`Image ${index + 1}: ${url}`));
+  console.log(`Received ${imageUrls.length} image URLs`);
+//   imageUrls.forEach((url, index) => console.log(`Image ${index + 1}: ${url}`));
 
   if (!Array.isArray(imageUrls) || imageUrls.length === 0) {
     return res.status(400).json({ error: "No image URLs provided." });
@@ -105,12 +105,36 @@ app.post("/convert", async (req, res) => {
     .inputOptions([
         `-framerate ${fps}`, // Set the input frame rate
       ])
+
+    
     .on("end", () => {
-        res.download(outputVideoPath, "output.mp4", (err) => {
+        // Validate the generated video file
+    if (!fs.existsSync(outputVideoPath) || fs.statSync(outputVideoPath).size === 0) {
+        console.error("Generated video is empty or missing.");
         cleanupFiles([...downloadedFiles, outputVideoPath]);
-        if (err) console.error("Error sending file:", err);
-        });
+        return res.status(500).json({ error: "Failed to generate a valid video file." });
+    }
+    
+    const stream = fs.createReadStream(outputVideoPath);
+    res.set({
+        "Content-Type": "video/mp4", // Explicit MIME type for video files
+        "Content-Disposition": `attachment; filename="${fileName}"`,
+    });
+    
+    stream.pipe(res);
+    
+    stream.on("close", () => {
+        cleanupFiles([...downloadedFiles, outputVideoPath]); // Clean up files after sending
+    });
+    
+    stream.on("error", (err) => {
+        console.error("Error streaming file:", err);
+        cleanupFiles([...downloadedFiles, outputVideoPath]);
+        res.status(500).json({ error: "Failed to stream video file." });
+    });
     })
+      
+
     .on("error", (err) => {
         console.error("FFmpeg error:", err);
         cleanupFiles([...downloadedFiles, outputVideoPath]);
