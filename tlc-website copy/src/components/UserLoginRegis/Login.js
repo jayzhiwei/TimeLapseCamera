@@ -17,17 +17,17 @@ const Login = () => {
     const isValidEmail = (email) => {const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);};
 
-    // useEffect(() => {
-    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //         if(user)
-    //             navigate('/home');
-    //         else
-    //             navigate('/');
-    //     });
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if(user)
+                navigate('/home');
+            else
+                navigate('/');
+        });
     
-    //     // Cleanup subscription on unmount
-    //     return () => unsubscribe();
-    // }, []);
+        // Cleanup subscription on unmount
+        return () => unsubscribe();
+    }, []);
 
     // Google Sign-In
     const handleGoogleSignIn = () => {

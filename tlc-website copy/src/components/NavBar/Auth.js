@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { auth } from '../../firebase/firebase.js';
+import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { Link, useMatch, useResolvedPath } from "react-router-dom";
 import { useContext } from 'react';
@@ -10,6 +11,7 @@ import "./Navbar.css"
 const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=4f577cb6-cb51-4001-88c8-5b06ae63490e';
 
 const Auth = () => {
+    const navigate = useNavigate();
     const [ authenticatedUser, setAuthenticatedUser ] = useState("");
     const { userProfile } = useContext(UserContext);
 
@@ -30,14 +32,15 @@ const Auth = () => {
 
     const userSignOut = () => {
         signOut(auth).then(() => {
-            console.log("User sign out");
+            navigate("/");
+            // console.log("User sign out");
         }).catch(error => "Sign out error")
     }
 
     return (
         <nav className="nav">
             {userProfile?.imageUrl && (
-                <CustomLink to="/">
+                <CustomLink to="/home">
                     <img src={userProfile.imageUrl} alt={userProfile.name} className="user-image-NV" 
                     onLoad={() => console.log("Image loaded successfully.")}
                     onError={(e) => {

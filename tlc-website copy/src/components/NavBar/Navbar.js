@@ -25,7 +25,7 @@ export default function Navbar() {
         <>
         {isLoggedIn ? (
             <nav className="nav">
-                <Link to="/" className="site-title">
+                <Link to="/home" className="site-title">
                     <img src={logo} className="App-logo" alt="logo"/>
                 </Link>
                 <div className="nav-links">
