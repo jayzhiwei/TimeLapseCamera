@@ -62,6 +62,7 @@ const MyDevices = () => {
     return () => unsubscribe();
   }, []);
 
+  
   // setPairedRasps from database
   useEffect(() => {
     const fetchPairedPis = async () => {
@@ -269,8 +270,9 @@ const MyDevices = () => {
                 <div className='status'>
                   {(() => {
                     const timeLapseStatus = pi.timeLapseCase?.data?.status;
+                    // console.log(pi.timeLapseCase?.data?.status)
                     if (pi.online) {
-                      if (timeLapseStatus === "running") {
+                      if (timeLapseStatus === "running") {       
                         return (
                           <div className="busyStatus" style={{ strokeWidth: "15" }}>
                             <MdOutlineWork />

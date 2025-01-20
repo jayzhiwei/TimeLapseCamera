@@ -3,9 +3,11 @@ import { collection, getDocs } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js"; // Update your Firebase paths
 import "./RaspiDetail.css";
 import { GrLinkPrevious, FaImage, FaFilm, MdOutlineWork } from "../../images/Icons.js"
-import EditCase from "../EditCase/EditCase.js"
+import CasePreview from "../CasePreview/CasePreview.js"
+import CaseAdd from "../CaseAdd/CaseAdd"
 import Film from "../Film/Film.js"
 import Album from "../Album/Album.js"
+
 
 const RaspiDetail = ({pi, onBack}) => {
     const [timeLapseCases, setTimeLapseCases] = useState([]);
@@ -14,6 +16,7 @@ const RaspiDetail = ({pi, onBack}) => {
     const [showEditPage, setShowEditPage] = useState(false);
     const [showFilmPage, setShowFilmPage] = useState(false); // State to toggle Film component
     const [showAlbumPage, setShowAlbumPage] = useState(false); // State to toggle Album component
+    const [showCaseAddPage, setShowCaseAddPage] = useState(false); // State to toggle Album component
     const [selectedCaseId, setSelectedCaseId] = useState(null); // State to store selected case ID
 
     // **Fetch TimeLapse Cases**
@@ -28,8 +31,8 @@ const RaspiDetail = ({pi, onBack}) => {
             id: doc.id,
             ...doc.data(),
             }));
+
             setTimeLapseCases(cases); // Store fetched data
-            // console.log(timeLapseCases);
             setLoading(false); // Stop loading
         } catch (err) {
             setError("Failed to fetch TimeLapse cases.");
@@ -39,23 +42,45 @@ const RaspiDetail = ({pi, onBack}) => {
         fetchTimeLapseCases();
     }, [pi.serial]); // Runs whenever `pi.serial` changes
 
-const formatDate = (dateString) => {
-    const date = new Date(dateString);
-    const day = date.getDate().toString().padStart(2, "0");
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
-    const year = date.getFullYear();
-    const hours = date.getHours().toString().padStart(2, "0");
-    const minutes = date.getMinutes().toString().padStart(2, "0");
-    const seconds = date.getSeconds().toString().padStart(2, "0");
-    return `${day}/${month}/${year} at ${hours}:${minutes}:${seconds}`;
-};
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const day = date.getDate().toString().padStart(2, "0");
+        const month = (date.getMonth() + 1).toString().padStart(2, "0"); // Months are 0-based
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const seconds = date.getSeconds().toString().padStart(2, "0");
+        return `${day}-${month}-${year} at ${hours}:${minutes}:${seconds}`;
+    };
+    
+    const handleSaveSuccess = async (id = null) => {
+        const timeLapseRef = collection(db, `raspberrys/${pi.serial}/TimeLapseCase`);
+        const timeLapseSnapshot = await getDocs(timeLapseRef);
+    
+        const updatedCases = timeLapseSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+        }));
+    
+        setTimeLapseCases(updatedCases); // Update the list of cases
 
+        if (selectedCaseId) {
+            const updatedCase = updatedCases.find((caseItem) => caseItem.id === selectedCaseId.id);
+            setSelectedCaseId(updatedCase); // Update the selected case
+            setShowEditPage(true); // Stay in edit mode
+        } else {
+            setShowEditPage(false);
+            setShowCaseAddPage(false);
+        }
+    };
+    
     if (showEditPage) {
         return (
-            <EditCase
+            <CasePreview
             pi={pi.serial}
             fullcase={selectedCaseId}
             onBack={() => setShowEditPage(false)} // Back to RaspiDetail
+            onSaveSuccess={handleSaveSuccess} // Pass the callback
             />
         );
     }
@@ -64,7 +89,8 @@ const formatDate = (dateString) => {
         return (
             <Album
             pi={pi.serial}
-            caseId={selectedCaseId}
+            caseId={selectedCaseId.id}
+            caseName={selectedCaseId.name}
             onBack={() => setShowAlbumPage(false)} // Back to RaspiDetail
             />
         );
@@ -74,8 +100,19 @@ const formatDate = (dateString) => {
         return (
             <Film
             pi={pi.serial}
-            caseId={selectedCaseId}
+            caseId={selectedCaseId.id}
+            caseName={selectedCaseId.name}
             onBack={() => setShowFilmPage(false)} // Back to RaspiDetail
+            />
+        );
+    }
+
+    if (showCaseAddPage) {
+        return (
+            <CaseAdd
+            pi={pi.serial}
+            onBack={() => setShowCaseAddPage(false)} // Back to RaspiDetail
+            onSaveSuccess={handleSaveSuccess}
             />
         );
     }
@@ -93,11 +130,22 @@ return (
                     <button className="back-button" onClick={onBack}>
                         <GrLinkPrevious />
                     </button>
+
+                    <button className="back-button" onClick={() => {
+                        setShowCaseAddPage(true);
+                        setSelectedCaseId(null);
+                    }}>
+                        Create new case
+                    </button>
                 </div>
 
                 <p className="device-name"><strong>{pi.data.NAME}</strong></p>
           {timeLapseCases.map((timeLapseCase) => (
-            <div key={timeLapseCase.id} className="timelapse-item">
+            <div key={timeLapseCase.id} className="timelapse-item"
+            onClick={() => {
+                setSelectedCaseId(timeLapseCase);
+                setShowEditPage(true);
+            }}>
                 <div className="timelapse-item-header">
                     <h3>{timeLapseCase.name}</h3>
                     <div className="icons">
@@ -133,19 +181,21 @@ return (
                         </div>
 
                         <button
-                            className="Details-button"
-                            onClick={() => {
-                                setSelectedCaseId(timeLapseCase);
-                                setShowAlbumPage(true);
-                            }}
-                            >
+                        className="Details-button"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedCaseId(timeLapseCase);
+                            setShowAlbumPage(true);
+                        }}
+                        >
                             <FaImage />
                         </button>
 
                         <button
                             className="Details-button"
-                            onClick={() => {
-                                setSelectedCaseId(timeLapseCase.id);
+                            onClick={(e) => {
+                            e.stopPropagation();
+                                setSelectedCaseId(timeLapseCase);
                                 setShowFilmPage(true);
                             }}
                             >
@@ -155,8 +205,10 @@ return (
                 </div>
 
                 <div className="timelapse-item-details">
+                    <p>Status Updated at: {timeLapseCase.statusUpdated_at}</p>
                     <p>Start: {formatDate(timeLapseCase.caseStart)}</p>
                     <p>End: &nbsp;{formatDate(timeLapseCase.caseEnd)}</p>
+                    
                 </div>
             </div>
           ))}
