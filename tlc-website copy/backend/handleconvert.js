@@ -19,6 +19,7 @@ app.use(
             'http://localhost:3000', 
             'https://www.timelapse2025.com',
             'http://www.timelapse2025.com',
+            'http://192.168.10.147:3000',
         ].includes(origin)) {
           callback(null, true);
         } else {
@@ -114,7 +115,7 @@ app.post("/convert", async (req, res) => {
         cleanupFiles([...downloadedFiles, outputVideoPath]);
         return res.status(500).json({ error: "Failed to generate a valid video file." });
     }
-    
+
     const stream = fs.createReadStream(outputVideoPath);
     res.set({
         "Content-Type": "video/mp4", // Explicit MIME type for video files
@@ -153,6 +154,35 @@ app.post("/convert", async (req, res) => {
   }
 });
 
+app.get("/download", async (req, res) => {
+    const { fileUrl, customName } = req.query;
+  
+    if (!fileUrl) {
+      return res.status(400).json({ error: "fileUrl is required" });
+    }
+  
+    try {
+      // Fetch the file from Firebase Storage
+      const response = await axios({
+        url: fileUrl,
+        method: "GET",
+        responseType: "stream", // Stream the file
+      });
+  
+      // Set appropriate headers to force download with custom filename
+      res.set({
+        "Content-Type": "video/mp4",
+        "Content-Disposition": `attachment; filename="${customName || "video.mp4"}"`,
+      });
+  
+      // Pipe the file stream to the response
+      response.data.pipe(res);
+    } catch (error) {
+      console.error("Error fetching the file from Firebase:", error.message);
+      res.status(500).json({ error: "Failed to download the file." });
+    }
+  });
+  
 // Start the server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {

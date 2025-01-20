@@ -9,31 +9,44 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
     // const currentUser = auth.currentUser;
     // const userUID = currentUser ? currentUser.uid : null;
 
-    const formatDateTime = (date) => {
-      const year = date.getFullYear();
-      const month = (date.getMonth() + 1).toString().padStart(2, "0");
-      const day = date.getDate().toString().padStart(2, "0");
-      const hours = date.getHours().toString().padStart(2, "0");
-      const minutes = date.getMinutes().toString().padStart(2, "0");
-      const seconds = date.getSeconds().toString().padStart(2, "0");
-      return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
-  };
+    // Helper: Format DateTime for UTC storage
+    const toUTC = (localTime) => {
+        const localDate = new Date(localTime);
+        return new Date(localDate.getTime() - localDate.getTimezoneOffset() * 60 * 1000).toISOString();
+    };
 
-    const now = useMemo(() => new Date(), []);
-    const caseStart = useMemo(() => new Date(now.getTime() + 30 * 1000), [now]);
-    const caseEnd = useMemo(() => new Date(caseStart.getTime() + 8 * 60 * 1000), [caseStart]);
+    // Helper: Format DateTime for Local Display
+    const toLocalTime = (utcTime) => {
+        const date = new Date(utcTime);
+        const localDate = new Date(date.getTime() + date.getTimezoneOffset() * 60 * 1000);
+        const year = localDate.getFullYear();
+        const month = (localDate.getMonth() + 1).toString().padStart(2, "0");
+        const day = localDate.getDate().toString().padStart(2, "0");
+        const hours = localDate.getHours().toString().padStart(2, "0");
+        const minutes = localDate.getMinutes().toString().padStart(2, "0");
+        return `${year}-${month}-${day}T${hours}:${minutes}`;
+    };
 
-    const initialFormData = useMemo(() => ({
-      name: "",
-      status: "standby",
-      resolution: "1080p",
-      intervalValue: 5,
-      timeUnit: "sec",
-      caseStart: formatDateTime(caseStart),
-      caseEnd: formatDateTime(caseEnd),
-      captureTime: "00:00:00_23:59:59",
-      createdStandby: serverTimestamp(),
-    }), [caseStart, caseEnd]);
+    // Memoized Initial Form Data
+    const initialFormData = useMemo(() => {
+        const now = new Date();
+        const caseStart = new Date(now.getTime() + 30 * 1000); // Start in 30 seconds
+        const caseEnd = new Date(caseStart.getTime() + 8 * 60 * 1000); // End 8 minutes later
+        
+
+        return {
+        name: "",
+        status: "standby",
+        resolution: "1080p",
+        intervalValue: 5,
+        timeUnit: "sec",
+        caseStart:toUTC(caseStart),
+        caseEnd: toUTC(caseEnd),
+        captureTime: "00:00:00_23:59:59",
+        createdStandby: serverTimestamp(),
+        };
+        
+    }, []);
 
     const [formData, setFormData] = useState(initialFormData);
     const [hasChanges, setHasChanges] = useState(false);
@@ -67,14 +80,14 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
           ...prevData,
           [name]: name === "intervalValue" ? Number(value) : value,
       }));
-  };
+    };
 
-  // Detect changes and validate `name` field
-  useEffect(() => {
-      const isChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
-      const isNameValid = formData.name.trim() !== ""; // Name cannot be empty
-      setHasChanges(isChanged && isNameValid);
-  }, [formData, initialFormData]);
+    // Detect changes and validate `name` field
+    useEffect(() => {
+        const isChanged = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+        const isNameValid = formData.name.trim() !== ""; // Name cannot be empty
+        setHasChanges(isChanged && isNameValid);
+    }, [formData, initialFormData]);
 
     // Handle Save
     const handleSave = async () => {
@@ -82,22 +95,24 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
             alert("Name is required.");
             return;
         }
-
+    
         try {
             const now = new Date();
             const formattedNow = `${now.getFullYear()}-${(now.getMonth() + 1)
               .toString()
-              .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now
-              .getHours()
-              .toString()
-              .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
-              .getSeconds()
-              .toString()
+              .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now.getHours().toString()
+              .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString()
               .padStart(2, "0")}`;
+
+            // Preprocess the `caseStart` and `caseEnd` fields
+            const formattedCaseStart = formData.caseStart.replace("T", " ").replace(/\.\d+Z$/, "");
+            const formattedCaseEnd = formData.caseEnd.replace("T", " ").replace(/\.\d+Z$/, "");
 
             // Prepare data for Firebase
             const newCase = {
                 ...formData,
+                caseStart: formattedCaseStart, // Use the formatted value
+                caseEnd: formattedCaseEnd, // Use the formatted value
                 // UID: userUID,
                 createdStandby: serverTimestamp(),
                 updated_at: formattedNow,
@@ -113,6 +128,61 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
             console.error("Error adding new case:", error.message);
             alert("Failed to add new case. Please try again.");
         }
+    };
+
+    // Helper: Render Time with Seconds
+    const renderTimeWithSeconds = (key, timeKey, label) => {
+        const [hoursMinutes, seconds] = (formData[key]?.split("_")[timeKey === "captureStart" ? 0 : 1] || "")
+        .split(":")
+        .reduce(
+            (acc, val, index) => (index < 2 ? [acc[0] + (acc[0] ? ":" : "") + val, acc[1]] : [acc[0], val]),
+            ["", "00"]
+        );
+
+        return (
+        <div>
+            <span>{label}</span>
+            <input
+            id={timeKey}
+            name={timeKey}
+            type="time"
+            value={hoursMinutes}
+            onChange={(e) =>
+                handleChange({
+                target: {
+                    name: key,
+                    value:
+                    timeKey === "captureStart"
+                        ? `${e.target.value}:${seconds || "00"}_${formData[key]?.split("_")[1] || ""}`
+                        : `${formData[key]?.split("_")[0] || ""}_${e.target.value}:${seconds || "00"}`,
+                },
+                })
+            }
+            />
+            <select
+            id={`${timeKey}-seconds`}
+            name={`${timeKey}-seconds`}
+            value={seconds || "00"}
+            onChange={(e) =>
+                handleChange({
+                target: {
+                    name: key,
+                    value:
+                    timeKey === "captureStart"
+                        ? `${hoursMinutes}:${e.target.value}_${formData[key]?.split("_")[1] || ""}`
+                        : `${formData[key]?.split("_")[0] || ""}_${hoursMinutes}:${e.target.value}`,
+                },
+                })
+            }
+            >
+            {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0")).map((sec) => (
+                <option key={sec} value={sec}>
+                {sec}
+                </option>
+            ))}
+            </select>
+        </div>
+        );
     };
 
     return (
@@ -133,6 +203,7 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
                                 <option value="SD_480p">480p SD (640x480)</option>
                             </select>
                         )}
+                        
                         {key === "status" && (
                             <select id={key} name={key} value={formData[key]} onChange={handleChange}>
                                 {/* <option value="aborted">Stop</option> */}
@@ -140,15 +211,21 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
                                 <option value="standby">Standby</option>
                             </select>
                         )}
+
                         {key === "intervalValue" && (
-                            <input
+                            <select
                                 id={key}
                                 name={key}
-                                type="number"
                                 value={formData[key]}
                                 onChange={handleChange}
-                            />
-                        )}
+                            >
+                                {Array.from({ length: 60 }, (_, i) => i + 1).map((num) => (
+                                <option key={num} value={num}>
+                                    {num}
+                                </option>
+                                ))}
+                            </select>
+                            )}
                         {key === "timeUnit" && (
                             <select id={key} name={key} value={formData[key]} onChange={handleChange}>
                                 <option value="month">Months</option>
@@ -158,51 +235,69 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
                                 <option value="sec">Seconds</option>
                             </select>
                         )}
+
                         {(key === "caseStart" || key === "caseEnd") && (
+                        <div>
+                            {/* Input for date and time */}
                             <input
-                                id={key}
-                                name={key}
-                                type="datetime-local"
-                                value={formData[key]}
-                                onChange={handleChange}
-                            />
-                        )}
-                        {key === "captureTime" && (
-                        <>
-                            <span> from </span>
-                            <input
-                            id="captureStart"
-                            name="captureStart"
-                            type="time"
-                            step="1"
-                            value={formData[key]?.split("_")[0] || ""}
+                            id={key}
+                            name={key}
+                            type="datetime-local"
+                            value={toLocalTime(formData[key])} // Convert UTC to Local
                             onChange={(e) =>
                                 handleChange({
                                 target: {
-                                    name: "captureTime",
-                                    value: `${e.target.value}_${formData[key]?.split("_")[1] || ""}`,
+                                    name: key,
+                                    value: toUTC(e.target.value), // Convert Local to UTC
                                 },
                                 })
                             }
                             />
-                            <span> to </span>
-                            <input
-                            id="captureEnd"
-                            name="captureEnd"
-                            type="time"
-                            step="1"
-                            value={formData[key]?.split("_")[1] || ""}
-                            onChange={(e) =>
+                            {/* Dropdown for seconds */}
+                            <select
+                            id={`${key}-seconds`}
+                            name={`${key}-seconds`}
+                            value={(() => {
+                                // Parse the ISO string (formData[key])
+                                const timePart = formData[key]?.split("T")[1]?.split(".")[0]; // Extract time without milliseconds or Z
+                                const seconds = timePart?.split(":")[2]; // Extract seconds
+                                return seconds || "00"; // Default to "00" if not available
+                            })()}
+                            onChange={(e) => {
+                                // Parse and reconstruct the updated datetime string
+                                const [datePart, timePart] = formData[key]?.split("T") || [];
+                                const [hours, minutes] = timePart?.split(":") || ["00", "00"];
+                                const newSeconds = e.target.value;
+
+                                // Reconstruct the ISO string
+                                const updatedTime = `${datePart}T${hours}:${minutes}:${newSeconds}.000Z`;
+
+                                // Update formData with the new time
                                 handleChange({
                                 target: {
-                                    name: "captureTime",
-                                    value: `${formData[key]?.split("_")[0] || ""}_${e.target.value}`,
+                                    name: key,
+                                    value: updatedTime, // Store the updated ISO string
                                 },
-                                  })
-                              }
-                              />
-                          </>
+                                });
+                            }}
+                            >
+                            {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0")).map((sec) => (
+                                <option key={sec} value={sec}>
+                                {sec}
+                                </option>
+                            ))}
+                            </select>
+
+                        </div>
                         )}
+
+                        {key === "captureTime" && (
+                        <>
+                            {renderTimeWithSeconds(key, "captureStart", "From:")}
+                            {renderTimeWithSeconds(key, "captureEnd", "To:")}
+                        </>
+                        )}
+
                         {key !== "resolution" &&
                         key !== "status" &&
                         key !== "timeUnit" &&

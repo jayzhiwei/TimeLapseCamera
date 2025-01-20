@@ -1,36 +1,77 @@
+/* Layout for the entire gallery */
 .video-gallery {
     display: grid;
     gap: 20px;
     padding: 20px;
-    align-items: center;
-    align-content: center;
+    align-items: start;
+    align-content: start;
     grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-    }
+  }
   
-.video-item {
+  /* Individual video container */
+  .video-item {
     width: 100%;
     max-width: 320px;
-    }
-
-.video-player {
+    background-color: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 15px;
+    text-align: center;
+  }
+  
+  /* Styling for the video player */
+  .video-player {
     width: 100%;
     height: auto;
     max-width: 100%;
     border-radius: 8px;
     background-color: #000;
-    }
-
-.error-message {
+  }
+  
+  /* Styling for metadata section */
+  .video-metadata {
+    text-align: left;
+    font-size: 0.9rem;
+    color: #495057;
+    margin-top: 10px;
+  }
+  
+  /* Styling metadata title and entries */
+  .video-metadata ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: inline;
+  }
+  
+  .video-metadata li {
+    margin-bottom: 5px;
+  }
+  
+  .video-metadata li strong {
+    font-weight: bold;
+  }
+  
+  /* Nested custom metadata styling */
+  .video-metadata ul ul {
+    margin-top: 5px;
+    margin-left: 20px;
+  }
+  
+  .video-metadata ul ul li {
+    font-size: 0.85rem;
+  }
+  
+  /* Error message styling */
+  .error-message {
     color: red;
     font-size: 16px;
     margin: 20px;
-    }
-
-p{
-    margin: 0;
-}
-
-.download-link {
+  }
+  
+  /* Styling for the download link */
+  .download-link {
     display: inline-block;
     margin-top: 10px;
     text-decoration: none;
@@ -41,3 +82,32 @@ p{
   .download-link:hover {
     text-decoration: underline;
   }
+  
+  /* Button styling */
+  .back-button {
+    display: inline-block;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1rem;
+    margin-bottom: 20px;
+  }
+  
+  .back-button:hover {
+    background-color: #0056b3;
+  }
+  
+  /* Responsive Design */
+  @media screen and (max-width: 768px) {
+    .video-gallery {
+      grid-template-columns: 1fr;
+    }
+  
+    .video-item {
+      max-width: 100%;
+    }
+  }
+  

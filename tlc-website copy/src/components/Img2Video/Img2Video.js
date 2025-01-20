@@ -4,7 +4,7 @@ import "./Img2Video.css";
 import axios from "axios";
 import { getStorage, ref, uploadBytesResumable, updateMetadata } from "firebase/storage";
 import { getAuth } from "firebase/auth";
-import { GrLinkPrevious, FaImage, FaFilm } from "../../images/Icons.js"
+import { MdFileDownload, MdCloudUpload, FaPlus } from "../../images/Icons.js"
 
 const resolutions = {
   "Max_View": { label: "12MP (4056x3040)", rank: 6 },
@@ -17,10 +17,11 @@ const resolutions = {
 
 const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
     const [uploadStatus, setUploadStatus] = useState("");
-    const [fps, setFps] = useState(30); // Default FPS
+    const [fps, setFps] = useState(6); 
     const [resolution, setResolution] = useState(""); // Default resolution
     const [availableResolutions, setAvailableResolutions] = useState([]);
-    const [customName, setCustomName] = useState("")
+    const [originalR, setoriginalR] = useState("");
+    const [customName, setCustomName] = useState("");
     const auth = getAuth();
     const currentUser = auth.currentUser;
     const userUID = currentUser ? currentUser.uid : null;
@@ -29,10 +30,10 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
   useEffect(() => {
     if (imageURLs.length > 0 && imageURLs[0]?.metadata?.customMetadata?.Resolution) {
       const originalResolutionKey = imageURLs[0].metadata.customMetadata.Resolution.trim();
-  
+      setoriginalR(originalResolutionKey)
       // Find the rank of the original resolution
       const originalResolution = resolutions[originalResolutionKey];
-  
+      
       if (originalResolution) {
         // Filter resolutions by rank
         const filteredResolutions = Object.entries(resolutions).filter(
@@ -47,7 +48,8 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
     } else {
       console.warn("Resolution metadata missing or imageURLs is empty.");
     }
-  }, [imageURLs]);  
+  }, [imageURLs]);
+
   
   const urls = imageURLs.map((image) => image.url);
   // console.log(urls)
@@ -151,18 +153,17 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
 
         <label>
           Frame per second (FPS): 
-          <input
-            type="number"
+          <select
+            id="fps"
             value={fps}
-            onChange={(e) => {
-              let value = e.target.value;
-              if (value >= 1 && value <= 60) {
-                setFps(value);
-              }
-            }}
-            min="1"
-            max="60"
-          />
+            onChange={(e) => setFps(Number(e.target.value))} // Update FPS
+          >
+            {Array.from({ length: 60 }, (_, i) => i + 1).map((value) => (
+              <option key={value} value={value}>
+                {value}
+              </option>
+            ))}
+          </select>
         </label>
         <label>
           Resolution: 
@@ -170,7 +171,7 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
               {availableResolutions.map(([key, { label }]) => (
                 <option key={key} value={key}>
                   {label}
-                  {resolution === key && " (original resolution)"}
+                  {key === originalR  && " (original resolution)"}
                 </option>
               ))}
             </select>
@@ -178,12 +179,12 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
       </div>
 
       <div className="button-group">
-        <button onClick={() => handleVideoConversion(false, true)}>Download</button>
-        <button onClick={() => handleVideoConversion(true, true)}>Download and Keep in Cloud</button>
-        <button onClick={() => handleVideoConversion(true, false)}>Keep in Cloud Only</button>
-        <button onClick={onBack}>Back</button>
+        <button onClick={() => handleVideoConversion(false, true)}><MdFileDownload /></button>
+        <button onClick={() => handleVideoConversion(true, false)}><MdCloudUpload /></button>
+        <button onClick={() => handleVideoConversion(true, true)}><MdFileDownload /> <FaPlus /> <MdCloudUpload /></button>
       </div>
       {uploadStatus && <p>{uploadStatus}</p>}
+      <button onClick={onBack}>Back</button>
     </div>
   );
 };

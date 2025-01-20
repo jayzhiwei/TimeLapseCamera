@@ -9,7 +9,28 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
     // const auth = getAuth();
     // const currentUser = auth.currentUser;
     // const userUID = currentUser ? currentUser.uid : null;
-    const [formData, setFormData] = useState(fullcase);
+
+    // Helper: Format DateTime for Local Display
+    const dontGetSecond = (utcTime) => {
+        const date = new Date(utcTime);
+        const year = date.getFullYear();
+        const month = (date.getMonth() + 1).toString().padStart(2, "0");
+        const day = date.getDate().toString().padStart(2, "0");
+        const hours = date.getHours().toString().padStart(2, "0");
+        const minutes = date.getMinutes().toString().padStart(2, "0");
+        const seconds = date.getSeconds().toString().padStart(2, "0");
+        return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}`;
+    };
+
+    const initialFormData = Object.keys(fullcase).reduce((acc, key) => {
+        acc[key] =
+            key === "caseStart" || key === "caseEnd"
+            ? dontGetSecond(fullcase[key]) // Format datetime fields
+            : fullcase[key]; // Keep other fields as is
+        return acc;
+        }, {});
+        
+    const [formData, setFormData] = useState(initialFormData);
     const [hasChanges, setHasChanges] = useState(false);
 
     const fieldOrder = [
@@ -37,13 +58,25 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
     // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prevData) => ({
-        ...prevData,
-        [name]: value,
-        [name]: name === "intervalValue" ? Number(value) : value,
-        }));
-        setHasChanges(true); // Enable save button when changes are made
+    
+        setFormData((prevData) => {
+            if (name.endsWith("-seconds")) {
+                const key = name.replace("-seconds", ""); // caseStart or caseEnd
+                const [datePart, timePart] = prevData[key]?.split("T") || [];
+                const [hours, minutes] = timePart?.split(":") || ["00", "00"];
+                const newSeconds = value;
+    
+                // Reconstruct the datetime in local time
+                return {
+                    ...prevData,
+                    [key]: `${datePart}T${hours}:${minutes}:${newSeconds}`, // Do not append `.000Z`
+                };
+            }
+    
+            return { ...prevData, [name]: value }; // Handle other fields
+        });
     };
+    
 
     // Check if values have changed
     useEffect(() => {
@@ -57,32 +90,90 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         const now = new Date();
         const formattedNow = `${now.getFullYear()}-${(now.getMonth() + 1)
             .toString()
-            .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now
-            .getHours()
-            .toString()
-            .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now
-            .getSeconds()
-            .toString()
+            .padStart(2, "0")}-${now.getDate().toString().padStart(2, "0")} ${now.getHours().toString()
+            .padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString()
             .padStart(2, "0")}`;
-        // Save changes to Firebase
-        const { id, UID, ...updatedData } = formData; // Destructure to exclude `id`
-        // updatedData.UID = userUID;
-        updatedData.updated_at = formattedNow;
-        // console.log("Updated Data:", updatedData);
 
+        const formattedCaseStart = formData.caseStart.replace("T", " ").replace(/\.\d+Z$/, "");
+        const formattedCaseEnd = formData.caseEnd.replace("T", " ").replace(/\.\d+Z$/, "");
+
+        // Format time fields
+        const { id, ...restFormData } = formData; // Exclude `id` from formData
+        const updatedData = {
+        ...restFormData, // Spread the rest of formData without `id`
+        caseStart: formattedCaseStart,
+        caseEnd: formattedCaseEnd,
+        updated_at: formattedNow,
+        };
+        
         const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
         await updateDoc(docRef, updatedData);
-        onSaveSuccess()
+        onSaveSuccess();
         setHasChanges(false); // Disable save button
         onBack(); // Exit editing mode
-
         alert("Changes saved successfully!");
-    
-        } catch (error) {
+        
+    } catch (error) {
         console.error("Error saving changes:", error.message);
         alert("Failed to save changes. Please try again.");
-        }
-    };
+    }
+  };
+
+    // Helper function to render time and seconds input CaptureStart and End Time
+    const renderTimeWithSeconds = (key, timeKey, label) => {
+        const [hoursMinutes, seconds] = (formData[key]?.split("_")[timeKey === "captureStart" ? 0 : 1] || "")
+        .split(":")
+        .reduce(
+            (acc, val, index) => (index < 2 ? [acc[0] + (acc[0] ? ":" : "") + val, acc[1]] : [acc[0], val]),
+            ["", "00"]
+        );
+    
+        return (
+        <div>
+            <span>{label}</span>
+            <input
+            id={timeKey}
+            name={timeKey}
+            type="time"
+            // step="1"
+            value={hoursMinutes} // Show HH:mm
+            onChange={(e) =>
+                handleChange({
+                target: {
+                    name: key,
+                    value:
+                    timeKey === "captureStart"
+                        ? `${e.target.value}:${seconds || "00"}_${formData[key]?.split("_")[1] || ""}`
+                        : `${formData[key]?.split("_")[0] || ""}_${e.target.value}:${seconds || "00"}`,
+                },
+                })
+            }
+            />
+            <select
+            id={`${timeKey}-seconds`}
+            name={`${timeKey}-seconds`}
+            value={seconds || "00"} // Show seconds
+            onChange={(e) =>
+                handleChange({
+                target: {
+                    name: key,
+                    value:
+                    timeKey === "captureStart"
+                        ? `${hoursMinutes}:${e.target.value}_${formData[key]?.split("_")[1] || ""}`
+                        : `${formData[key]?.split("_")[0] || ""}_${hoursMinutes}:${e.target.value}`,
+                },
+                })
+            }
+            >
+            {Array.from({ length: 60 }, (_, i) => i.toString().padStart(2, "0")).map((sec) => (
+                <option key={sec} value={sec}>
+                {sec}
+                </option>
+            ))}
+            </select>
+        </div>
+        );
+    };  
 
     return (
         <div className="App-background">
@@ -110,14 +201,20 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                 </select>
                 )} */}
                 {key === "intervalValue" && (
-                <input
-                    id={key}
-                    name={key}
-                    type="number"
-                    value={formData[key] || ""}
-                    onChange={handleChange}
-                />
+                    <select
+                        id={key}
+                        name={key}
+                        value={formData[key]}
+                        onChange={handleChange}
+                    >
+                        {Array.from({ length: 60 }, (_, i) => i + 1).map((num) => (
+                        <option key={num} value={num}>
+                            {num}
+                        </option>
+                        ))}
+                    </select>
                 )}
+
                 {key === "timeUnit" && (
                 <select id={key} name={key} value={formData[key] || ""} onChange={handleChange}>
                     <option value="month">Months</option>
@@ -127,54 +224,52 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
                     <option value="sec">Seconds</option>
                 </select>
                 )}
+
                 {(key === "caseStart" || key === "caseEnd") && (
-                <input
-                    id={key}
-                    name={key}
-                    step="1"
-                    type="datetime-local"
-                    value={new Date(new Date(formData[key]).getTime() + 8 * 60 * 60 * 1000)
-                    .toISOString()
-                    .slice(0, -1)}
-                    onChange={handleChange}
-                />
-                )}
+                        <div>
+                            {/* Input for date and time */}
+                            <input
+                            id={key}
+                            name={key}
+                            type="datetime-local"
+                            value={formData[key]?.slice(0, 16)}
+                            onChange={(e) =>
+                                handleChange({
+                                    target: { name: key, value: `${e.target.value}` },
+                                })
+                            }
+                            />
+                            {/* Dropdown for seconds */}
+                            <select
+                                id={`${key}-seconds`}
+                                name={`${key}-seconds`}
+                                value={(() => {
+                                    const timePart = formData[key]?.split("T")[1];
+                                    const seconds = timePart?.split(":")[2];
+                                    return seconds || "00";
+                                })()}
+                                onChange={(e) => {
+                                    handleChange({ target: { name: `${key}-seconds`, value: e.target.value } });
+                                }}
+                            >
+                                {Array.from({ length: 60 }, (_, i) => (
+                                    <option key={i} value={i.toString().padStart(2, "0")}>
+                                        {i.toString().padStart(2, "0")}
+                                    </option>
+                                ))}
+                            </select>
+
+
+                        </div>
+                        )}
+
                 {key === "captureTime" && (
                 <>
-                    <span> from </span>
-                    <input
-                    id="captureStart"
-                    name="captureStart"
-                    type="time"
-                    step="1"
-                    value={formData[key]?.split("_")[0] || ""}
-                    onChange={(e) =>
-                        handleChange({
-                        target: {
-                            name: "captureTime",
-                            value: `${e.target.value}_${formData[key]?.split("_")[1] || ""}`,
-                        },
-                        })
-                    }
-                    />
-                    <span> to </span>
-                    <input
-                    id="captureEnd"
-                    name="captureEnd"
-                    type="time"
-                    step="1"
-                    value={formData[key]?.split("_")[1] || ""}
-                    onChange={(e) =>
-                        handleChange({
-                        target: {
-                            name: "captureTime",
-                            value: `${formData[key]?.split("_")[0] || ""}_${e.target.value}`,
-                        },
-                        })
-                    }
-                    />
+                    {renderTimeWithSeconds(key, "captureStart", "From:")}
+                    {renderTimeWithSeconds(key, "captureEnd", "To:")}
                 </>
                 )}
+
                 {key !== "resolution" &&
                 key !== "status" &&
                 key !== "timeUnit" &&

@@ -13,7 +13,7 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
   const currentUser = auth.currentUser;
   const userUID = currentUser ? currentUser.uid : null;
   const [showImg2VideoPage, setShowImg2VideoPage] = useState(false);
-
+// 
   const formatTimestamp = (timestamp) => {
     const year = timestamp.substring(0, 4);
     const month = timestamp.substring(4, 6); // Note: Month is 1-based

@@ -1,7 +1,7 @@
-import { FaCircle, FaImage, FaFilm, FaVideo, FaLink, FaCircleInfo } from "react-icons/fa6"; 
+import { FaCircle, FaImage, FaFilm, FaVideo, FaLink, FaCircleInfo, FaPlus } from "react-icons/fa6"; 
 import { TbAlertTriangleFilled } from "react-icons/tb"; 
 import { FaWifi } from "react-icons/fa";
-import { MdOutlineWork, MdEdit } from "react-icons/md";
+import { MdOutlineWork, MdEdit, MdFileDownload,MdCloudUpload } from "react-icons/md";
 import { GrLinkPrevious } from "react-icons/gr";
 import { VscSignOut } from "react-icons/vsc";
 
@@ -18,4 +18,7 @@ export {
     FaCircleInfo,
     GrLinkPrevious, // go to previous page "<GrLinkPrevious />"
     VscSignOut,
+    MdFileDownload,
+    MdCloudUpload,
+    FaPlus,
 }
