@@ -1,5 +1,5 @@
 import React, { useState, useEffect }  from 'react';
-import { collection, query, where, getDocs, orderBy, limit } from "firebase/firestore";
+import { collection, query, where, getDocs, orderBy, limit, doc, onSnapshot } from "firebase/firestore";
 import { ref, onValue } from "firebase/database"; // Real time database
 import { onAuthStateChanged } from "firebase/auth";
 import { auth, db, realtimeDB } from '../../firebase/firebase.js';
@@ -23,6 +23,89 @@ const MyDevices = () => {
   const [error, setError] = useState(null);
   const [status, setStatus] = useState("");
   
+// Move activeListeners outside the useEffect
+const activeListeners = new Map();
+
+useEffect(() => {
+  const currentCaseIds = new Set();
+
+  pairedPis.forEach((pi) => {
+    if (pi.online && pi.timeLapseCase) {
+      const caseId = pi.timeLapseCase.id;
+
+      // Track currently active caseIds
+      currentCaseIds.add(caseId);
+
+      // Check if a listener for this case is already active
+      if (activeListeners.has(caseId)) {
+        console.log(`Listener for case ${caseId} is already active.`);
+        return;
+      }
+
+      // console.log(`Setting up listener for running case: ${caseId}`);
+
+      const caseRef = doc(
+        db,
+        "raspberrys",
+        pi.serial,
+        "TimeLapseCase",
+        caseId
+      );
+
+      // Set up a real-time listener
+      const unsubscribe = onSnapshot(caseRef, (snapshot) => {
+        if (snapshot.exists()) {
+          const caseData = snapshot.data();
+          // console.log(`Real-time update for case ${caseId}:`, caseData);
+      
+          // Check if the case status or other important fields changed before updating state
+          setPairedPis((prevPairedPis) =>
+            prevPairedPis.map((innerPi) => {
+              if (innerPi.serial === pi.serial) {
+                // Compare current state with the new data
+                const currentData = innerPi.timeLapseCase?.data;
+                if (
+                  currentData?.status !== caseData.status ||
+                  JSON.stringify(currentData) !== JSON.stringify(caseData)
+                ) {
+                  console.log(`Updating state for case ${caseId} due to changes.`);
+                  return {
+                    ...innerPi,
+                    timeLapseCase: { id: snapshot.id, data: caseData },
+                  };
+                }
+              }
+              return innerPi;
+            })
+          );
+        } else {
+          console.log(`Running case ${caseId} no longer exists.`);
+          setPairedPis((prevPairedPis) =>
+            prevPairedPis.map((innerPi) =>
+              innerPi.serial === pi.serial ? { ...innerPi, timeLapseCase: null } : innerPi
+            )
+          );
+        }
+      });
+      
+
+      // Add the unsubscribe function to the map
+      activeListeners.set(caseId, unsubscribe);
+    }
+  });
+
+  // Cleanup: Unsubscribe only listeners that are no longer in use
+  activeListeners.forEach((unsubscribe, caseId) => {
+    if (!currentCaseIds.has(caseId)) {
+      // console.log(`Cleaning up listener for case ${caseId}`);
+      unsubscribe();
+      activeListeners.delete(caseId);
+    }
+  });
+
+  // No need for a return cleanup function here because we handle it dynamically
+}, [pairedPis]); // Runs whenever `pairedPis` updates
+  
   useEffect(() => {
     if (pairedPis.length > 0) {
       // Map over the pairedPis array and extract the status dynamically
@@ -34,19 +117,18 @@ const MyDevices = () => {
     }
   }, [pairedPis]);
   // console.log(status)
-  
+
   // Loop for all paired raspberry Pi...
   useEffect(() => {
     if (!pairedPis || pairedPis.length === 0) return; // Wait until the paired raspberry found
     
     for(let i = 0; i < pairedPis.length; i++){
       listenToPiStatus(pairedPis[i]); // Listen to current status
-      
     }
+    // console.log(pairedPis);
     // console.log(pairedPis[1].timeLapseCase.data.status);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status]);
-  // console.log(pairedPis);
 
   // setUserId
   useEffect(() => {
@@ -69,41 +151,38 @@ const MyDevices = () => {
       if (!userId) return; // Wait until userId is set
       else setPairedPis([]);  // Reset pairedPi
 
-      try{
+      try {
         const piRef = collection(db, "raspberrys");
         const q = query(piRef, where("UID", "==", userId));
         const querySnapshot = await getDocs(q);
-
+  
         const matchedPis = await Promise.all(
           querySnapshot.docs.map(async (doc) => {
-            const serial = doc.id; 
+            const serial = doc.id;
             const data = doc.data();
 
-            // Extract data...
-            const temperatureLog = await fetchTemperatureLog(doc.id); // Last created temperature log
-            const network = await fetchNetwork(doc.id); // Last connected network
-            if (data?.online === true){
-              const timeLapseCase = await fetchTimeLapseCases(doc.id);  // Lastest updated time lapse case
+            const latestNetwork = await fetchLatestNetwork(serial);
+  
+            // Fetch temperature log
+            const temperatureLog = await fetchTemperatureLog(serial);
+  
+            // Fetch timelapse case === running
+            const timeLapseCase = await fetchRunningTimeLapseCases(serial);
+
+            // Fetch timelapse case if the Pi is online
+            // const timeLapseCase = data?.online ? await fetchTimeLapseCases(serial) : null;
               
               return {
                 serial,
                 data,
                 temperatureLog: temperatureLog ? temperatureLog : null,
                 timeLapseCase: timeLapseCase ? timeLapseCase : null,
-                network: network ? network : null
+                network: latestNetwork ? latestNetwork : null,
               };
-            } else {
-              return {
-                serial,
-                data,
-                temperatureLog: temperatureLog ? temperatureLog : null,
-                network: network ? network : null
-              };
-            }
-          })
-        );
+            })
+          );
         setPairedPis(matchedPis);
-        // console.log(pairedPis);
+        // console.log(matchedPis);
       } catch(err){
         const errorMsg = "Error fetching Raspberry Pis: " + err;
         // console.log(errorMsg);
@@ -128,65 +207,102 @@ const MyDevices = () => {
       // console.log(snapshot)
       return snapshot.docs[0];
     }
-
-    // const snapshotDocs = snapshot.docs.map((doc) => ({
-    //   id: doc.id,
-    //   data: doc.data()
-    // }));
-
-    // return snapshotDocs[snapshotDocs.length - 1]
   };
 
   // Get lastest "timeLapseCases" for this device
-  const fetchTimeLapseCases = async (serial) => {
-    const timeLapseRef = collection(
-      db, "raspberrys",
-      serial, "TimeLapseCase"
-    );
-    const snapshot = await getDocs(timeLapseRef);
-    const snapshotDocs = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      data: doc.data()
-    }));
-
-    // console.log(snapshotDocs);
-    
-    // Sort the cases by "updated_at" in descending order
-    const sortedSnapshotDocs =  snapshotDocs
-    .filter(doc => doc.data?.status !== "standby")
-    .sort((a, b) => {
-        const dateA = new Date(a.data.updated_at).getTime();
-        const dateB = new Date(b.data.updated_at).getTime();  
-        return dateB - dateA; // Descending order
+  const fetchRunningTimeLapseCases = async (serial) => {
+    // console.log("Fetching the running timeLapseCase for Pi:", serial);
+  
+    try {
+      const timeLapseRef = collection(db, "raspberrys", serial, "TimeLapseCase");
+      const q = query(timeLapseRef, where("status", "==", "running")); // Only fetch the running case
+      const snapshot = await getDocs(q);
+  
+      if (!snapshot.empty) {
+        const runningCase = snapshot.docs[0]; // Since there can only be one running case
+        // console.log("Fetched running TimeLapseCase:", runningCase.data());
+        return { id: runningCase.id, data: runningCase.data() };
+      } else {
+        // console.log("No running TimeLapseCase found for Pi:", serial);
+        return null;
       }
-    );
-    console.log(sortedSnapshotDocs);
-    // Return the first (latest) case if available
-    return sortedSnapshotDocs.length > 0 ? sortedSnapshotDocs[0] : null;
+    } catch (error) {
+      console.error("Error fetching TimeLapseCases:", error);
+      return null;
+    }
   };
+  
+    // const fetchTimeLapseCases = async (serial) => {
+    //   console.log("entered Get lastest TimeLapseCase for this device")
+    //   try {
+    //     const timeLapseRef = collection(db, "raspberrys", serial, "TimeLapseCase");
+    //     const snapshot = await getDocs(timeLapseRef);
+    
+    //     const snapshotDocs = snapshot.docs.map((doc) => ({
+    //       id: doc.id,
+    //       data: doc.data(),
+    //     }));
+    
+    //     console.log("Fetched TimeLapseCase Docs:", snapshotDocs);
+    
+    //     // Filter and sort
+    //     const sortedSnapshotDocs = snapshotDocs
+    //       .filter(doc => doc.data?.status !== "standby")
+    //       .sort((a, b) => {
+    //         const dateA = new Date(a.data.updated_at?.toDate?.() || a.data.updated_at).getTime();
+    //         const dateB = new Date(b.data.updated_at?.toDate?.() || b.data.updated_at).getTime();
+    //         return dateB - dateA;
+    //       });
+    
+    //     console.log("Sorted TimeLapseCases:", sortedSnapshotDocs);
+    
+    //     return sortedSnapshotDocs.length > 0 ? sortedSnapshotDocs[0] : null;
+    //   } catch (error) {
+    //     console.error("Error fetching TimeLapseCases:", error);
+    //     return null;
+    //   }
+    // };
+    
+    // Fetch the latest network
+    const fetchLatestNetwork = async (piId) => {
+      const networkCollectionRef = collection(db, "raspberrys", piId, "network");
+      const networkDocs = await getDocs(networkCollectionRef);
 
-  // Get lastest connected "network" for this device
-  const fetchNetwork = async (serial) => {
-    const networkRef = collection(
-      db, "raspberrys",
-      serial, "network"
-    );
-    const snapshot = await getDocs(networkRef);
-    const snapshotDocs = snapshot.docs.map((doc) => ({
-      id: doc.id,
-      data: doc.data()
-    }));
+      let latestNetwork = null;
 
-    // Sort the cases by "timeAdd" in descending order
-    const sortedSnapshotDocs =  snapshotDocs.sort((a, b) => {
-      const dateA = new Date(a.data.timeAdd).getTime();
-      const dateB = new Date(b.data.timeAdd).getTime();
-      return dateB - dateA; // Descending order
-    });
+      networkDocs.forEach((doc) => {
+        const networkData = doc.data();
+        if (networkData.timeAdd?.seconds) {
+          if (!latestNetwork || networkData.timeAdd.seconds > latestNetwork.data.timeAdd.seconds) {
+            latestNetwork = { id: doc.id, data: networkData };
+          }
+        }
+      });
 
-    // Return the first (latest) case if available
-    return sortedSnapshotDocs.length > 0 ? sortedSnapshotDocs[0] : null;
-  };
+      return latestNetwork;
+    };
+
+  // // Get lastest connected "network" for this device
+  // const fetchNetwork = async (serial) => {
+  //   const networkRef = collection(
+  //     db, "raspberrys",
+  //     serial, "network"
+  //   );
+  //   const snapshot = await getDocs(networkRef);
+  //   const snapshotDocs = snapshot.docs.map((doc) => ({
+  //     id: doc.id, data: doc.data()
+  //   }));
+
+  //   // Sort the cases by "timeAdd" in descending order
+  //   const sortedSnapshotDocs =  snapshotDocs.sort((a, b) => {
+  //     const dateA = new Date(a.data.timeAdd).getTime();
+  //     const dateB = new Date(b.data.timeAdd).getTime();
+  //     return dateB - dateA; // Descending order
+  //   });
+
+  //   // Return the first (latest) case if available
+  //   return sortedSnapshotDocs.length > 0 ? sortedSnapshotDocs[0] : null;
+  // };
 
   // Listen to realtime data in firebase for raspberry Pi status
   const listenToPiStatus = async (pairedPi) => {
@@ -205,7 +321,7 @@ const MyDevices = () => {
           if (data){  // If this device available...
             const realtimeTime = data.timestamp;
             const intervalTime = currentTime - realtimeTime;
-
+            
             return {
               ...pi,
               online: intervalTime <= 3.5 * 60, // Return true if within 3.5 minutes
@@ -219,7 +335,9 @@ const MyDevices = () => {
                 lastStatusUpdate: currentTime // Record the time once
               };
             }
+            
             return pi;
+            
           } 
         })
       );
@@ -313,6 +431,7 @@ const MyDevices = () => {
               </div>
 
               <div className='connection'>
+                Lastest connected: <br />
                 <div className='connectionTitle'>
                   {pi.network.data?.Interface === "ethernet" ? (
                     // If device connected by lan cable
@@ -324,9 +443,7 @@ const MyDevices = () => {
                   <span><b>
                     {pi.network.id}</b></span>
                 </div>
-                
                 <p className='connectionDetail'>
-                  First connected date: <br />
                   {formatFirestoreTimestamp(pi.network.data.timeAdd.seconds)}
                 </p>
               </div>
