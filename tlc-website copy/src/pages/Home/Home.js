@@ -7,6 +7,7 @@ import ErrorMsg from '../../components/ErrorMsg/ErrorMsg.js';
 import '../../App.css';
 import './Home.css';
 import MyDevices from '../../components/MyDevices/MyDevices.js';
+import RaspiDetail from '../../components/RaspiDetail/RaspiDetail.js';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 
 const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=4f577cb6-cb51-4001-88c8-5b06ae63490e';
@@ -18,6 +19,7 @@ function Home() {
   const [isEditingProfilePicture, setIsEditingProfilePicture] = useState(false);
   const [isEditingName, setIsEditingName] = useState(false);
   const [newName, setNewName] = useState('');
+  const [selectedPi, setSelectedPi] = useState(null);
 
   // Function to handle name change
   const handleNameChange = async () => {
@@ -142,72 +144,73 @@ function Home() {
     return () => unsubscribe();
   }, [setUserProfile]);
 
-  const handleUserInfoVisibility = () => {
-
+  function handleSelectedPi(pi){
+      setSelectedPi(pi);
   };
 
   return (
     <div className="App-background">
       <ErrorMsg error={error} />
-        <div>
-          <div className="user-info">
-            <img src={userProfile.imageUrl} 
-            alt={userProfile.name} 
-            className="user-image" 
-            onLoad={() => console.log("Image loaded successfully.")}
-            onError={(e) => {
-              e.target.src = defaultProfileImage; // Fallback to default image on error
-              console.error("Error loading profile image.");}}
-            onClick={handleProfilePictureClick}
-            />
+      { selectedPi === null && (<div>
+        <div className="user-info">
+          <img src={userProfile.imageUrl} 
+          alt={userProfile.name} 
+          className="user-image" 
+          onLoad={() => console.log("Image loaded successfully.")}
+          onError={(e) => {
+            e.target.src = defaultProfileImage; // Fallback to default image on error
+            console.error("Error loading profile image.");}}
+          onClick={handleProfilePictureClick}
+          />
 
-            {isEditingName ? (
-              <div>
-                <input
-                  type="text"
-                  value={newName}
-                  onChange={(e) => setNewName(e.target.value)}
-                  placeholder="Enter new name"
-                  className="name-input"
-                />
-                <button onClick={handleNameChange} className="save-name-button">
-                  Save
-                </button>
-                <button
-                  onClick={() => setIsEditingName(false)}
-                  className="cancel-name-button"
-                >
-                  Cancel
-                </button>
-              </div>
-            ) : (
-              <span>
-                Welcome, {userProfile.name}{" "}
-                <button
-                  onClick={() => {
-                    setIsEditingName(true);
-                    setNewName(userProfile.name || "");
-                  }}
-                  className="edit-name-button"
-                >
-                  Change Name
-                </button>
-                </span>
-            )}
-
-          </div>
-          {isEditingProfilePicture && (
-            <div className="profile-picture-upload">
-              <input type="file" onChange={handleFileChange} />
-              {selectedFile && (
-                <button onClick={handleUploadProfilePicture} className="upload-button">Upload New Profile Picture</button>
-              )}
+          {isEditingName ? (
+            <div>
+              <input
+                type="text"
+                value={newName}
+                onChange={(e) => setNewName(e.target.value)}
+                placeholder="Enter new name"
+                className="name-input"
+              />
+              <button onClick={handleNameChange} className="save-name-button">
+                Save
+              </button>
+              <button
+                onClick={() => setIsEditingName(false)}
+                className="cancel-name-button"
+              >
+                Cancel
+              </button>
             </div>
+          ) : (
+            <span>
+              Welcome, {userProfile.name}{" "}
+              <button
+                onClick={() => {
+                  setIsEditingName(true);
+                  setNewName(userProfile.name || "");
+                }}
+                className="edit-name-button"
+              >
+                Change Name
+              </button>
+              </span>
           )}
+
         </div>
-        <div className="myDevices-component">
-          <MyDevices />
-        </div>
+        {isEditingProfilePicture && (
+          <div className="profile-picture-upload">
+            <input type="file" onChange={handleFileChange} />
+            {selectedFile && (
+              <button onClick={handleUploadProfilePicture} className="upload-button">Upload New Profile Picture</button>
+            )}
+          </div>
+        )}
+      </div>)}
+      {selectedPi === null ? 
+        (<MyDevices handleSelectedPi={handleSelectedPi} />):
+        (<RaspiDetail pi={selectedPi} onBack={() => setSelectedPi(null)} />)  
+      }
     </div>
   );
 }

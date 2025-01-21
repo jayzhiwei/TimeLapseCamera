@@ -5,7 +5,6 @@ import { onAuthStateChanged } from "firebase/auth";
 import { auth, db, realtimeDB } from '../../firebase/firebase.js';
 import { formatFirestoreTimestamp } from '../../functions/formatDate';
 import ErrorMsg from '../ErrorMsg/ErrorMsg.js';
-import RaspiDetail from '../RaspiDetail/RaspiDetail.js';
 import '../../App.css';
 import './MyDevices.css';
 
@@ -14,10 +13,8 @@ import eth0Icon from "../../images/ethernet.png";
 import roomTemp from "../../images/RTemp.svg";
 import cpuTemp from "../../images/CPUTemp.svg";
 import { FaCircle, FaWifi, MdOutlineWork } from "../../images/Icons";
-// import { FaCircle, FaWifi, IoBriefcaseOutline, MdOutlineWork } from "../../images/Icons";
 
-const MyDevices = () => {
-  const [selectedPi, setSelectedPi] = useState(null);
+const MyDevices = ({handleSelectedPi}) => {
   const [userId, setUserId] = useState(null);
   const [pairedPis, setPairedPis] = useState([]);
   const [error, setError] = useState(null);
@@ -362,9 +359,6 @@ useEffect(() => {
 
   // console.log(serial)
   if (!pairedPis) return null; // Do not render the component if no error exists
-  if (selectedPi) {
-    return <RaspiDetail pi={selectedPi} onBack={() => setSelectedPi(null)} />;
-  }
 
   return (
     <div className="RaspberryCam">
@@ -377,12 +371,10 @@ useEffect(() => {
         <div className='devices'>
           {pairedPis.map((pi) => (
             <div
-            key={pi.serial}
-            className="deviceCard"
-            onClick={() => setSelectedPi(pi)}
+              key={pi.serial}
+              className="deviceCard"
+              onClick={() => handleSelectedPi(pi)}
             >
-              {/* <RaspiDetail pi = {pi} /> */}
-
               <div className='title'>
                 <h3>{pi.data.NAME}</h3>
                 <div className='status'>
