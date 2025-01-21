@@ -101,6 +101,7 @@ useEffect(() => {
   });
 
   // No need for a return cleanup function here because we handle it dynamically
+  // eslint-disable-next-line
 }, [pairedPis]); // Runs whenever `pairedPis` updates
   
   useEffect(() => {
