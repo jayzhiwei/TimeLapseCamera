@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
+import { updateDoc, doc } from "firebase/firestore";
+import { db } from "../../firebase/firebase.js";
 import "../../App.css";
 import "./Album.css";
 import { getAuth } from "firebase/auth";
 import Img2Video from "../Img2Video/Img2Video.js"
 
-const Album = ({ pi, caseId, caseName, onBack }) => {
+const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -13,7 +15,7 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
   const currentUser = auth.currentUser;
   const userUID = currentUser ? currentUser.uid : null;
   const [showImg2VideoPage, setShowImg2VideoPage] = useState(false);
-// 
+
   const formatTimestamp = (timestamp) => {
     const year = timestamp.substring(0, 4);
     const month = timestamp.substring(4, 6); // Note: Month is 1-based
@@ -41,7 +43,7 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
   useEffect(() => {
     const fetchImages = async () => {
       const storage = getStorage();
-      const folderPath = `album/${userUID}/${pi}/${caseId}/`;
+      const folderPath = `album/${userUID}/${pi}/${fullcase.id}/`;
       const folderRef = ref(storage, folderPath);
 
       try {
@@ -58,8 +60,14 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
       const sortedFiles = filesWithMetadata.sort((a, b) =>
         a.metadata.name.localeCompare(b.metadata.name)
       );
-
         setImages(sortedFiles);
+
+      // Trigger count comparison after fetching images
+      const imagesFetched = sortedFiles.length;
+      if (imagesFetched !== fullcase.picturesCaptured) {
+        await updateFirebaseCount(imagesFetched);
+      }
+
       } catch (err) {
         setError("Failed to fetch images or metadata.");
         console.error(err);
@@ -68,16 +76,37 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
       }
     };
     fetchImages();
-  }, [userUID, pi, caseId]);
+
+  }, [userUID, pi, fullcase.id]);
 
   // console.log(images)
+//   const compareAndUpdateCount = async () => {
+//     const imagesFetched = images ? Object.keys(images).length : 0;
+
+//     if (imagesFetched !== fullcase.picturesCaptured) {
+//         console.log('Mismatch detected. Updating Firebase...');
+//         updateFirebaseCount(imagesFetched); // Call the update function
+//     } else {
+//         console.log('Counts match. No update needed.');
+//     }
+// };
+
+  const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+  const updateFirebaseCount = async (imagesFetched) => {
+    const updatedData = {
+        picturesCaptured: imagesFetched,
+    };
+    await updateDoc(docRef, updatedData);
+    console.log('Firebase updated successfully.');
+    onSaveSuccess();
+  };
+
 
   if (showImg2VideoPage) {
     return (
         <Img2Video
         pi={pi}
-        caseId={caseId}
-        caseName={caseName}
+        fullcase={fullcase}
         imageURLs={images}
         onBack={() => setShowImg2VideoPage(false)} // Back to RaspiDetail
         />
@@ -87,7 +116,8 @@ const Album = ({ pi, caseId, caseName, onBack }) => {
   return (
     <div className="App-background">
       <h1>Album Page</h1>
-      <p><strong>{caseName}</strong></p>
+      <p><strong>{fullcase.name}</strong></p>
+      <p><strong>Total Images: </strong>{fullcase.picturesCaptured}</p>
       {/* <p>Device Serial: <strong>{pi}</strong></p>
       <p>Displaying Album for Case ID: <strong>{caseId}</strong></p> */}
       {images.length > 0 && (

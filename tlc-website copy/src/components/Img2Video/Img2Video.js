@@ -15,7 +15,7 @@ const resolutions = {
   "SD_480p": { label: "480p SD (640x480)", rank: 1 },
 };
 
-const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
+const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
     const [uploadStatus, setUploadStatus] = useState("");
     const [fps, setFps] = useState(6); 
     const [resolution, setResolution] = useState(""); // Default resolution
@@ -101,7 +101,7 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
       if (saveToCloud) {
         setUploadStatus("Uploading video to the cloud...");
         const storage = getStorage();
-        const storageRef = ref(storage, `films/${userUID}/${pi}/${caseId}/${fileName}`);
+        const storageRef = ref(storage, `films/${userUID}/${pi}/${fullcase.id}/${fileName}`);
         const uploadTask = uploadBytesResumable(storageRef, videoBlob, {
           contentType: "video/mp4", // Explicitly set the MIME type
         });
@@ -137,7 +137,8 @@ const Img2Video = ({ pi, caseId, caseName, imageURLs, onBack }) => {
   return (
     <div className="App-background">
       <h1>Images to Video Convertion</h1>
-      <p><strong>{caseName}</strong></p>
+      <p><strong>{fullcase.name}</strong></p>
+      <p><strong>Total Images: </strong>{fullcase.picturesCaptured}</p>
       {/* <p>Case ID: <strong>{caseId}</strong></p>
       <p>Device Serial: <strong>{pi}</strong></p> */}
       <div className="settings">

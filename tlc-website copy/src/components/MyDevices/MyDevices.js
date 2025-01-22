@@ -213,7 +213,7 @@ useEffect(() => {
   
     try {
       const timeLapseRef = collection(db, "raspberrys", serial, "TimeLapseCase");
-      const q = query(timeLapseRef, where("status", "==", "running")); // Only fetch the running case
+      const q = query(timeLapseRef, where("status", "==", "running"), limit(1)); // Only fetch the running case
       const snapshot = await getDocs(q);
   
       if (!snapshot.empty) {
@@ -247,8 +247,8 @@ useEffect(() => {
     //     const sortedSnapshotDocs = snapshotDocs
     //       .filter(doc => doc.data?.status !== "standby")
     //       .sort((a, b) => {
-    //         const dateA = new Date(a.data.updated_at?.toDate?.() || a.data.updated_at).getTime();
-    //         const dateB = new Date(b.data.updated_at?.toDate?.() || b.data.updated_at).getTime();
+    //         const dateA = new Date(a.data.statusUpdated_at?.toDate?.() || a.data.statusUpdated_at).getTime();
+    //         const dateB = new Date(b.data.statusUpdated_at?.toDate?.() || b.data.statusUpdated_at).getTime();
     //         return dateB - dateA;
     //       });
     

@@ -89,9 +89,9 @@ const RaspiDetail = ({pi, onBack}) => {
         return (
             <Album
             pi={pi.serial}
-            caseId={selectedCaseId.id}
-            caseName={selectedCaseId.name}
+            fullcase={selectedCaseId}
             onBack={() => setShowAlbumPage(false)} // Back to RaspiDetail
+            onSaveSuccess={handleSaveSuccess}
             />
         );
         }
@@ -205,10 +205,10 @@ return (
                 </div>
 
                 <div className="timelapse-item-details">
-                    <p>Status Updated at: {timeLapseCase.statusUpdated_at}</p>
+                    <p>Status updated at: {timeLapseCase.statusUpdated_at}</p>
                     <p>Start: {formatDate(timeLapseCase.caseStart)}</p>
                     <p>End: &nbsp;{formatDate(timeLapseCase.caseEnd)}</p>
-                    
+                    <p>Total images: &nbsp;{timeLapseCase.picturesCaptured||"0"}</p>
                 </div>
             </div>
           ))}
