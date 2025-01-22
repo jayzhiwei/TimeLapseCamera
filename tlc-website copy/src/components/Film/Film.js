@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
+import { getStorage, ref, listAll, getDownloadURL, getMetadata, deleteObject } from "firebase/storage";
 import "../../App.css";
 import "./Film.css";
 import { getAuth } from "firebase/auth";
@@ -97,7 +97,25 @@ const Film = ({ pi, caseId, caseName, onBack }) => {
     }
   };
   
-  
+  const handleDelete = async (index) => {
+    const confirmed = window.confirm("Are you sure you want to delete this video?");
+    if (!confirmed) return;
+    try {
+      const storage = getStorage();
+      const fileRef = ref(storage, metadata[index]?.fullPath); // Use the fullPath from metadata to locate the file
+      await deleteObject(fileRef);
+
+      // Remove the deleted video's data from state
+      setfirebaseUrls((prev) => prev.filter((_, i) => i !== index));
+      setVideoUrls((prev) => prev.filter((_, i) => i !== index));
+      setMetadata((prev) => prev.filter((_, i) => i !== index));
+
+      alert("Video deleted successfully.");
+    } catch (error) {
+      console.error("Error deleting video:", error);
+      setError("Failed to delete the video. Please try again.");
+    }
+  };
   
   const handleError = (e) => {
     console.error("Error playing video:", e);
@@ -157,7 +175,12 @@ const Film = ({ pi, caseId, caseName, onBack }) => {
             >
               Download
             </button>
-
+            <button
+                className="delete-button"
+                onClick={() => handleDelete(index)}
+              >
+                Delete
+            </button>
           </div>
         ))}
       </div>

@@ -4,7 +4,7 @@ import "../../App.css";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 
-const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
+const CaseAdd = ({ pi, onBack, onUpdateCase }) => {
     // const auth = getAuth();
     // const currentUser = auth.currentUser;
     // const userUID = currentUser ? currentUser.uid : null;
@@ -33,7 +33,6 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
         const caseStart = new Date(now.getTime() + 30 * 1000); // Start in 30 seconds
         const caseEnd = new Date(caseStart.getTime() + 8 * 60 * 1000); // End 8 minutes later
         
-
         return {
         name: "",
         status: "standby",
@@ -120,8 +119,14 @@ const CaseAdd = ({ pi, onBack, onSaveSuccess }) => {
             };
 
             const timeLapseRef = collection(db, `raspberrys/${pi}/TimeLapseCase`);
-            await addDoc(timeLapseRef, newCase);
-            onSaveSuccess()
+
+            const docRef = await addDoc(timeLapseRef, newCase);
+            // Create the complete case object with the ID
+            const completeCase = { id: docRef.id, ...newCase };
+            onUpdateCase(completeCase);
+
+            // console.log(completeCase)
+
             alert("New case added successfully!");
             onBack(); // Return to RaspiDetail
         } catch (error) {

@@ -4,7 +4,7 @@ import "./CaseEdit.css";
 import { updateDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 
-const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
+const CaseEdit = ({ pi, fullcase, onBack, onUpdateCase }) => {
   const dontGetSecond = (utcTime) => {
     const date = new Date(utcTime);
     const year = date.getFullYear();
@@ -26,6 +26,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
 
   const [formData, setFormData] = useState(initialFormData);
   const [hasChanges, setHasChanges] = useState(false);
+  const [localFullcase, setLocalFullcase] = useState(fullcase);
 
   const fieldOrder = [
     "name",
@@ -97,7 +98,12 @@ const CaseEdit = ({ pi, fullcase, onBack, onSaveSuccess }) => {
 
       const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
       await updateDoc(docRef, updatedData);
-      onSaveSuccess();
+
+      const updatedCase = { ...localFullcase, ...updatedData };
+      setLocalFullcase(updatedCase);
+      onUpdateCase(updatedCase);
+
+      // console.log(updatedCase);
       setHasChanges(false);
       onBack();
       alert("Changes saved successfully!");

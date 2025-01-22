@@ -1,4 +1,4 @@
-import React, { useState, useEffect, } from "react";
+import React, { useState, } from "react";
 import "../../App.css";
 import "./CasePreview.css";
 // import { getAuth } from "firebase/auth";
@@ -7,13 +7,14 @@ import { doc, updateDoc,  } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 import CaseEdit from "../CaseEdit/CaseEdit"; // Import the CaseEdit component
 
-const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
+const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
     // const auth = getAuth();
     // const currentUser = auth.currentUser;
     // const userUID = currentUser ? currentUser.uid : null;
 
-    const [formData, setFormData] = useState({});
+    // const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
+    const [localFullcase, setLocalFullcase] = useState(fullcase);
     // const listenerAttached = useRef(false);
     // const lastAlertedStatus = useRef(null); // Track the last alerted status
   
@@ -28,9 +29,9 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         return `${day}-${month}-${year} at ${hours}:${minutes}:${seconds}`;
     };
 
-  useEffect(() => {
-    setFormData(fullcase);
-  }, [fullcase]);
+  // useEffect(() => {
+  //   setFormData(fullcase);
+  // }, [fullcase]);
  
   // Handle Status changes
   const handleStatusChange = async (newStatus) => {
@@ -72,14 +73,16 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
         // UID: userUID,
         statusUpdated_at: formattedNow,
       })
-      onSaveSuccess();
+      const updatedCase = { ...localFullcase, status: newStatus };
+      setLocalFullcase(updatedCase);
+      onUpdateCase(updatedCase);
       setIsEditing(false); // Exit editing mode
 
       // Update the local state to reflect the status change
-      setFormData((prevData) => ({
-        ...prevData,
-        status: newStatus,
-      }));   
+      // setFormData((prevData) => ({
+      //   ...prevData,
+      //   status: newStatus,
+      // }));   
 
       // // Start or stop listening based on the status
       // if (newStatus === "running") {
@@ -157,23 +160,22 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
   //     stopListening();
   //   };
   // }, [stopListening]);
+  if (isEditing) {
+    return (
+        <CaseEdit
+            pi={pi}
+            fullcase={fullcase}
+            onBack={() => setIsEditing(false)}
+            onUpdateCase={onUpdateCase} // Pass the callback to propagate changes
+        />
+    );
+}
 
     return (
         <div className="App-background">
         <h1>{fullcase.name}</h1>
-        {isEditing ? (
-            <CaseEdit
-            pi={pi}
-            fullcase={formData}
-            onBack={() => setIsEditing(false)}
-            onSaveSuccess={onSaveSuccess}
-            />
-        ) : (
             <div className="view-mode">
-            <button
-            className="edit-button"
-            onClick={() => setIsEditing(true)}
-            >
+            <button className="edit-button" onClick={() => setIsEditing(true)}>
             <MdEdit/>
             </button>
             
@@ -228,7 +230,6 @@ const CasePreview = ({ pi, fullcase, onBack, onSaveSuccess }) => {
             Back
             </button>
         </div>
-        )}
     </div>
     );
 };

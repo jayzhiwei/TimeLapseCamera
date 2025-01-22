@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback} from "react";
 import { getStorage, ref, listAll, getDownloadURL, getMetadata } from "firebase/storage";
 import { updateDoc, doc } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
@@ -7,7 +7,7 @@ import "./Album.css";
 import { getAuth } from "firebase/auth";
 import Img2Video from "../Img2Video/Img2Video.js"
 
-const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
+const Album = ({ pi, fullcase, onBack, onUpdateCase }) => {
   const [images, setImages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -15,6 +15,7 @@ const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
   const currentUser = auth.currentUser;
   const userUID = currentUser ? currentUser.uid : null;
   const [showImg2VideoPage, setShowImg2VideoPage] = useState(false);
+  const [localFullcase, setLocalFullcase] = useState(fullcase);
 
   const formatTimestamp = (timestamp) => {
     const year = timestamp.substring(0, 4);
@@ -39,6 +40,25 @@ const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
       return `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`; // Gigabytes
     }
   };
+  
+  const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+
+  // Update firebase picturesCaptured for current caseID
+  const updateFirebaseCount = useCallback(async (imagesFetched) => {
+    const updatedData = {picturesCaptured: imagesFetched,};
+    await updateDoc(docRef, updatedData);
+    
+    const updatedCase = { ...localFullcase, picturesCaptured: imagesFetched };
+    setLocalFullcase(updatedCase);
+    onUpdateCase(updatedCase);
+
+    console.log("Firebase updated successfully.");
+    console.log(imagesFetched)
+  }, [docRef, localFullcase, onUpdateCase]);
+
+  // useEffect(() => {
+  //   console.log("Updated localFullcase:", localFullcase);
+  // }, [localFullcase]);
 
   useEffect(() => {
     const fetchImages = async () => {
@@ -64,10 +84,19 @@ const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
 
       // Trigger count comparison after fetching images
       const imagesFetched = sortedFiles.length;
-      if (imagesFetched !== fullcase.picturesCaptured) {
-        await updateFirebaseCount(imagesFetched);
+      if (
+        imagesFetched !== localFullcase.picturesCaptured &&
+        imagesFetched !== fullcase.picturesCaptured
+      ){  
+        console.log(imagesFetched)
+        console.log(localFullcase.picturesCaptured)
+        if (
+          fullcase.picturesCaptured === undefined ||
+          localFullcase.picturesCaptured === undefined
+        ){
+          await updateFirebaseCount(imagesFetched);
+        }
       }
-
       } catch (err) {
         setError("Failed to fetch images or metadata.");
         console.error(err);
@@ -76,8 +105,7 @@ const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
       }
     };
     fetchImages();
-
-  }, [userUID, pi, fullcase.id]);
+  }, [userUID, pi, fullcase.id, fullcase.picturesCaptured, localFullcase.picturesCaptured, updateFirebaseCount]);
 
   // console.log(images)
 //   const compareAndUpdateCount = async () => {
@@ -90,17 +118,6 @@ const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
 //         console.log('Counts match. No update needed.');
 //     }
 // };
-
-  const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
-  const updateFirebaseCount = async (imagesFetched) => {
-    const updatedData = {
-        picturesCaptured: imagesFetched,
-    };
-    await updateDoc(docRef, updatedData);
-    console.log('Firebase updated successfully.');
-    onSaveSuccess();
-  };
-
 
   if (showImg2VideoPage) {
     return (
@@ -115,49 +132,69 @@ const Album = ({ pi, fullcase, onBack, onSaveSuccess }) => {
 
   return (
     <div className="App-background">
-      <h1>Album Page</h1>
-      <p><strong>{fullcase.name}</strong></p>
-      <p><strong>Total Images: </strong>{fullcase.picturesCaptured}</p>
+    <div className="fullcase-details">
+      <h2>{fullcase.name}</h2>
+      <p>
+        <strong>Total Images: </strong> 
+        {fullcase.picturesCaptured || localFullcase.picturesCaptured}
+      </p>
+
+      {images.length > 0 && (
+        <p><strong>Resolution: </strong> {images[0].metadata.customMetadata.Resolution}</p>
+      )}
+
+      {images.length > 0 && (
+        <p><strong>Content Type: </strong> {images[0].metadata.contentType}</p>
+      )}
+
+      <p><strong>Total File Size: </strong> {formatFileSize(totalSizeInBytes)}</p>
+    </div>
+      
       {/* <p>Device Serial: <strong>{pi}</strong></p>
       <p>Displaying Album for Case ID: <strong>{caseId}</strong></p> */}
-      {images.length > 0 && (
-      <p>
-        <strong>Resolution :</strong> {images[0].metadata.customMetadata.Resolution}
-      </p>)}
-      {images.length > 0 && (
-      <p>
-        <strong>Content type :</strong> {images[0].metadata.contentType}
-      </p>)}
-      <p><strong>Total file size:</strong> {formatFileSize(totalSizeInBytes)}</p>
-      <button className="back-button" onClick={onBack}>
-        Back
-      </button>
-      <button
-        className="Details-button"
-        onClick={() => {;
-            setShowImg2VideoPage(true);
-        }}>
-        Image to Video
-      </button>
+      
+      <div>
+        <button
+          className="Details-button"
+          onClick={() => {;
+              setShowImg2VideoPage(true);
+          }}>
+          Image to Video
+        </button>
+
+        <button className="back-button" onClick={onBack}>
+          Back
+        </button>
+      </div>
+
       {loading && <p>Loading images...</p>}
       {error && <p className="error">{error}</p>}
-      <div className="image-grid">
-      {images.map(({ url, metadata }, index) => (
-          <div key={index} className="image-container">
-            <img src={url} alt={`${index}`} className="album-image" />
-            <div className="image-metadata">
-              {/* <p><strong>Name:</strong> {metadata.name}</p> */}
-              <p><strong>Capture at:</strong> {formatTimestamp(metadata.name.split('.')[0])}</p>
-              <p><strong>CPU:</strong> {metadata.customMetadata.CPU} °C</p>
-              <p><strong>Room:</strong> {metadata.customMetadata.Room} °C</p>
-              {/* <p><strong>Resolution :</strong> {metadata.customMetadata.Resolution}</p> */}
-              <p><strong>Size:</strong> {formatFileSize(metadata.size)}</p>
-              {/* <p><strong>Content Type:</strong> {metadata.contentType}</p> */}
-            </div>
-          </div>
-        ))}
+
+      <div >
+        <div>
+          {images.map(({ url, metadata }, index) => (
+            <div key={index} class="responsive">
+              <div class="gallery">
+              <a target="_blank" rel="noopener noreferrer" href={url}>
+                <img src={url} alt={`${index}`} width="600" height="400" />
+              </a>
+              <div className="desc"> 
+                <strong>{formatTimestamp(metadata.name.split('.')[0])}</strong><br />
+                <strong>CPU:</strong> {metadata.customMetadata.CPU} °C<br />
+                <strong>Room:</strong> {metadata.customMetadata.Room} °C<br />
+                <strong>Size:</strong> {formatFileSize(metadata.size)}
+                {/* <p><strong>Name:</strong> {metadata.name}</p> */}
+                {/* <p><strong>Resolution :</strong> {metadata.customMetadata.Resolution}</p> */}
+                {/* <p><strong>Content Type:</strong> {metadata.contentType}</p> */}
+              </div>
+              </div>
+              </div>
+          ))}
+          <div class="clearfix"></div>
+        </div>
       </div>
     </div>
+    
   );
 };
 

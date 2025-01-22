@@ -41,7 +41,7 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
         );
   
         setAvailableResolutions(filteredResolutions);
-        setResolution(originalResolutionKey); // Set default to the original resolution
+        setResolution((currentResolution) => currentResolution || originalResolutionKey); // Set default to the original resolution
       } else {
         console.warn("Original resolution key not found in predefined resolutions.");
       }
