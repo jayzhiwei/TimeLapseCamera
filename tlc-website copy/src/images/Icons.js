@@ -4,6 +4,8 @@ import { FaWifi } from "react-icons/fa";
 import { MdOutlineWork, MdEdit, MdFileDownload, MdCloudUpload, MdDelete } from "react-icons/md";
 import { GrLinkPrevious } from "react-icons/gr";
 import { VscSignOut } from "react-icons/vsc";
+import { MdFilterListAlt } from "react-icons/md";
+import { IoCloseSharp } from "react-icons/io5";
 
 export {
     FaCircle,   // Fill circle "<FaCircle />"
@@ -22,4 +24,6 @@ export {
     MdCloudUpload,
     MdDelete,
     FaPlus,
+    MdFilterListAlt, // filter "<MdFilterListAlt />"
+    IoCloseSharp, // close "<IoCloseSharp />"
 }
