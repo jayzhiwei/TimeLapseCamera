@@ -221,12 +221,33 @@ h1 {
 }
 
 .modal-content {
-  background: #f38b04;
+  background: #3c3e5a;
   padding: 20px;
   border-radius: 8px;
   width: 400px;
   text-align: center;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  /* Display filter container 
+  (this is for filter popup only) */
+  .filter-container {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .close-filter {
+    background: none;
+    border-style: none;
+    color: white;
+    font-weight: bolder;
+    padding: 5px;
+    border-radius: 5px;
+  }
+
+  .close-filter:hover {
+    background-color: #4a4e69;
+    cursor: pointer;
+  }
 }
 
 .modal-actions {
@@ -247,33 +268,46 @@ h1 {
   background-color: #ff7875;
 }
 
-.filter-container {
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background-color: #4a4e69;
-  padding: 10px;
-  border-radius: 5px;
-  margin-bottom: 20px;
-}
+.filter-section{
+  /* The screen is smallest than 700px*/
+  @media only screen and (max-width: 700px) {
 
-.filter-item {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  margin: 0 10px;
-
-  .label {
-    font-size: 14px;
-    color: #edf2f4;
-    margin-bottom: 5px;
+    /* Show filter icon */
+    .small-screen-filter {
+        display: flex;
+    }
   }
 
-  .input,
-  .select {
-    padding: 5px;
-    border-radius: 4px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+  /* If the screen is bigger than 700px */
+  @media only screen and (min-width: 700px) {
+    .small-screen-filter {
+        display: none;
+    }
+  }
+
+  .small-screen-filter {
+    flex-direction: column;
+    width: 100%;
+
+    /* Visible the filter component within the popup */
+    .filter-container {
+      display: flex;
+    }
+
+    button {
+      align-self: flex-end;
+      background-color: white;
+      border-radius: 8px;
+      opacity: 50%;
+      border-style: none;
+      color: rgb(99, 93, 93);
+      padding-top: 5px;
+    }
+  }
+
+  .small-screen-filter button:hover {
+    cursor: pointer;
+    background-color: #4a4e69;
+    color: white;
   }
 }
