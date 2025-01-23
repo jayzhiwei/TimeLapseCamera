@@ -32,6 +32,50 @@ const RaspiDetail = ({pi, onBack}) => {
     const currentUser = auth.currentUser;
     const userUID = currentUser ? currentUser.uid : null;
 
+    const initialFilters = {
+        name: "",
+        status: "",
+        resolution: "",
+        startDate: "",
+        endDate: "",
+      };
+
+    const [filters, setFilters] = useState({
+        name: "",
+        status: "",
+        resolution: "",
+        startDate: "",
+        endDate: "",
+    });
+
+    useEffect(() => {
+        const filtered = timeLapseCases.filter((caseItem) => {
+            const matchesName = filters.name
+                ? caseItem.name.toLowerCase().includes(filters.name.toLowerCase())
+                : true;
+    
+            const matchesStatus = filters.status
+                ? caseItem.status === filters.status
+                : true;
+    
+            const matchesResolution = filters.resolution
+                ? caseItem.resolution === filters.resolution
+                : true;
+    
+            const caseStartDate = new Date(caseItem.caseStart);
+            const caseEndDate = new Date(caseItem.caseEnd);
+    
+            const matchesDateRange =
+                (!filters.startDate || caseStartDate >= new Date(filters.startDate)) &&
+                (!filters.endDate || caseEndDate <= new Date(filters.endDate));
+    
+            return matchesName && matchesStatus && matchesResolution && matchesDateRange;
+        });
+    
+        setFilteredCases(filtered);
+    }, [filters, timeLapseCases]);
+    
+
     // **Fetch TimeLapse Cases**
     useEffect(() => {
         const fetchTimeLapseCases = async () => {
@@ -220,31 +264,36 @@ const RaspiDetail = ({pi, onBack}) => {
         );
         };
 
-    
-const FilterPopUp = ({ open, onClose }) => {
-    if(!open) return null;
-    // console.log(open);
 
-    return (
-        <div className="modal-overlay">
+
+    const FilterPopUp = ({ open, onClose }) => {
+        const [localFilters, setLocalFilters] = useState(filters); // Local state copy
+        if (!open) return null;
+
+        return (
+            <div className="modal-overlay">
             <div className="modal-content">
                 <Filter 
-                    cases = {timeLapseCases} 
-                    fCases = {(filtered) => {
-                        // console.log(filtered);
-                        setFilteredCases(filtered);
-                    }} 
+                filters={localFilters}
+                setFilters={(filterType, value) => {
+                    setLocalFilters(prev => ({ ...prev, [filterType]: value }));
+                }}
                 />
+                <div className="filter-actions">
+                <button onClick={onClose}>Cancel</button>
                 <button 
-                    className="close-filter"
-                    onClick={onClose}
+                    onClick={() => {
+                    setFilters(localFilters); // Update main filters only on confirm
+                    onClose();
+                    }}
                 >
-                        Close
+                    Confirm
                 </button>
+                </div>
             </div>
-        </div>
-    );
-};
+            </div>
+        );
+        };
 
 return (
     <header>
@@ -265,17 +314,26 @@ return (
                     }}>
                         Create new case
                     </button>
+
+                    <button className="reset-button" onClick={() => {
+                        setFilters(initialFilters); // Reset main filters
+                    }
+                }>
+                    reset
+                    </button>
                 </div>
 
                 <p className="device-name"><strong>{pi.data.NAME}</strong></p>
                 {/* Filter Input Field */}
                 <div className="filter-section">
                     <Filter 
-                        cases = {timeLapseCases} 
-                        fCases = {(filtered) => {
-                            // console.log(filtered);
-                            setFilteredCases(filtered);
-                        }} 
+                        filters={filters}
+                        setFilters={(filterType, value) => {
+                            setFilters((prevFilters) => ({
+                                ...prevFilters,
+                                [filterType]: value,
+                            }));
+                        }}
                     />
 
                     <div className="small-screen-filter">

@@ -1,44 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import "./FilterCase.css";
 
-const FilterCase = ({cases=[], fCases}) => {
-    const [filters, setFilters] = useState({
-        name: "",
-        status: "",
-        resolution: "",
-        startDate: "",
-        endDate: "",
-    });
-    const [timeLapseCases] = useState(cases);
-
+const FilterCase = React.memo(({ filters, setFilters }) => {
     // Handle Filtering
     const handleFilterChange = (filterType, value) => {
-        const updatedFilters = { ...filters, [filterType]: value };
-        setFilters(updatedFilters);
-    
-        const filtered = timeLapseCases.filter((caseItem) => {
-            const matchesName = updatedFilters.name
-                ? caseItem.name.toLowerCase().includes(updatedFilters.name.toLowerCase())
-                : true;
-        
-            const matchesStatus = updatedFilters.status
-                ? caseItem.status === updatedFilters.status
-                : true;
-        
-            const matchesResolution = updatedFilters.resolution
-                ? caseItem.resolution === updatedFilters.resolution
-                : true;
-
-            const caseStartDate = new Date(caseItem.caseStart);
-            const caseEndDate = new Date(caseItem.caseEnd);
-
-            const matchesDateRange =
-            (!updatedFilters.startDate || caseStartDate >= new Date(updatedFilters.startDate)) &&
-            (!updatedFilters.endDate || caseEndDate <= new Date(updatedFilters.endDate));      
-    
-          return matchesName && matchesStatus && matchesResolution && matchesDateRange;
-        });
-        fCases(filtered);
+        setFilters(filterType, value); // Directly update the shared state
     };
     
     return(
@@ -102,6 +68,6 @@ const FilterCase = ({cases=[], fCases}) => {
             </div>
         </div>
     );
-}
+})
 
 export default FilterCase;

@@ -37,3 +37,10 @@
       font-size: 14px;
     }
 }
+
+.filter-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+  justify-content: flex-end;
+}
