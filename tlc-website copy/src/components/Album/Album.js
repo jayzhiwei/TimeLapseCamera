@@ -84,19 +84,21 @@ const Album = ({ pi, fullcase, onBack, onUpdateCase }) => {
 
       // Trigger count comparison after fetching images
       const imagesFetched = sortedFiles.length;
+      // if (
+      //   imagesFetched !== localFullcase.picturesCaptured ||
+      //   imagesFetched !== fullcase.picturesCaptured
+      // ){  
+        // console.log(imagesFetched)
+        // console.log(localFullcase.picturesCaptured)
       if (
-        imagesFetched !== localFullcase.picturesCaptured &&
+        fullcase.picturesCaptured === undefined ||
+        localFullcase.picturesCaptured === undefined ||
+        imagesFetched !== localFullcase.picturesCaptured ||
         imagesFetched !== fullcase.picturesCaptured
-      ){  
-        console.log(imagesFetched)
-        console.log(localFullcase.picturesCaptured)
-        if (
-          fullcase.picturesCaptured === undefined ||
-          localFullcase.picturesCaptured === undefined
-        ){
-          await updateFirebaseCount(imagesFetched);
-        }
+      ){
+        await updateFirebaseCount(imagesFetched);
       }
+      // }
       } catch (err) {
         setError("Failed to fetch images or metadata.");
         console.error(err);

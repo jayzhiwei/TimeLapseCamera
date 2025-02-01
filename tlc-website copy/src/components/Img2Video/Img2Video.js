@@ -28,12 +28,10 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
   // console.log(imageURLs[0].metadata.customMetadata.Resolution)
 
   useEffect(() => {
-    if (imageURLs.length > 0 && imageURLs[0]?.metadata?.customMetadata?.Resolution) {
-      const originalResolutionKey = imageURLs[0].metadata.customMetadata.Resolution.trim();
+      const originalResolutionKey =fullcase.resolution;
       setoriginalR(originalResolutionKey)
       // Find the rank of the original resolution
-      const originalResolution = resolutions[originalResolutionKey];
-      
+      const originalResolution = resolutions[originalResolutionKey]
       if (originalResolution) {
         // Filter resolutions by rank
         const filteredResolutions = Object.entries(resolutions).filter(
@@ -45,12 +43,10 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
       } else {
         console.warn("Original resolution key not found in predefined resolutions.");
       }
-    } else {
-      console.warn("Resolution metadata missing or imageURLs is empty.");
-    }
+
   }, [imageURLs]);
 
-  
+
   const urls = imageURLs.map((image) => image.url);
   // console.log(urls)
 
