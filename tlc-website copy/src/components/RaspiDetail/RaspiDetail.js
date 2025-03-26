@@ -70,9 +70,12 @@ const RaspiDetail = ({pi, onBack}) => {
     if (showPreviewPage) {
         return (
             <CasePreview
-            pi={pi.serial}
+            pi={pi}
+            allCases={timeLapseCases}
             fullcase={selectedCaseId}
-            onBack={() => setShowPreviewPage(false)} // Back to RaspiDetail
+            onBack={() => {
+                setShowPreviewPage(false)
+            }} // Back to RaspiDetail
             // onSaveSuccess={handleSaveSuccess} // Pass the callback
             onUpdateCase={(updatedCase) => {
                 // Update the specific case in timeLapseCases

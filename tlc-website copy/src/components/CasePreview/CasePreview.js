@@ -1,4 +1,4 @@
-import React, { useState, } from "react";
+import React, { useState, useEffect } from "react";
 import "../../App.css";
 import "./CasePreview.css";
 // import { getAuth } from "firebase/auth";
@@ -7,7 +7,7 @@ import { doc, updateDoc,  } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 import CaseEdit from "../CaseEdit/CaseEdit"; // Import the CaseEdit component
 
-const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
+const CasePreview = ({ pi, allCases, fullcase, onBack, onUpdateCase }) => {
     // const auth = getAuth();
     // const currentUser = auth.currentUser;
     // const userUID = currentUser ? currentUser.uid : null;
@@ -15,6 +15,7 @@ const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
     // const [formData, setFormData] = useState({});
     const [isEditing, setIsEditing] = useState(false);
     const [localFullcase, setLocalFullcase] = useState(fullcase);
+    const [ canRun, setCanRun ] = useState(true);
     // const listenerAttached = useRef(false);
     // const lastAlertedStatus = useRef(null); // Track the last alerted status
   
@@ -28,6 +29,21 @@ const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
         const seconds = date.getSeconds().toString().padStart(2, "0");
         return `${day}-${month}-${year} at ${hours}:${minutes}:${seconds}`;
     };
+
+    // **Check if one of the cases is running**
+    useEffect(() => {
+        const checkTimeLapseCasesStatus = async () => {
+          for(let i = 0; i < allCases.length; i++){
+            const item = allCases[i]
+            // console.log(item.id)
+            if(item.status === "running"){
+              setCanRun(false);
+              break;
+            }
+          }
+        };
+        checkTimeLapseCasesStatus();
+    }, []);
 
   // useEffect(() => {
   //   setFormData(fullcase);
@@ -67,7 +83,7 @@ const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
         }
       }
   
-      const docRef = doc(db, `raspberrys/${pi}/TimeLapseCase/${fullcase.id}`);
+      const docRef = doc(db, `raspberrys/${pi.serial}/TimeLapseCase/${fullcase.id}`);
       await updateDoc(docRef, {
         status: newStatus,
         // UID: userUID,
@@ -160,10 +176,13 @@ const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
   //     stopListening();
   //   };
   // }, [stopListening]);
+
+  // console.log(allCases)
+
   if (isEditing) {
     return (
         <CaseEdit
-            pi={pi}
+            pi={pi.serial}
             fullcase={fullcase}
             onBack={() => setIsEditing(false)}
             onUpdateCase={onUpdateCase} // Pass the callback to propagate changes
@@ -207,7 +226,7 @@ const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
             <button
                 className="run-button"
                 onClick={() => handleStatusChange("running")}
-                disabled={fullcase.status === "running"}
+                disabled={fullcase.status === "running" || pi.online === false || canRun === false }
             >
                 Run
             </button>
@@ -224,6 +243,7 @@ const CasePreview = ({ pi, fullcase, onBack, onUpdateCase }) => {
             className="back-button"
             onClick={() => {
                 // listenerAttached.current = false
+                setCanRun(true);
                 onBack();
             }}
             >

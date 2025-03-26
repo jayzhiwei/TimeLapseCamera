@@ -2,10 +2,11 @@ import React, { useState, useEffect } from "react";
 import { auth } from '../../firebase/firebase.js';
 import { useNavigate } from 'react-router-dom';
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { Link, useMatch, useResolvedPath } from "react-router-dom";
+import { Link, useMatch, useResolvedPath, useLocation } from "react-router-dom";
 import { useContext } from 'react';
 import { UserContext } from '../UserContext';
 import { VscSignOut } from '../../images/Icons.js'
+
 import "./Navbar.css"
 
 const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=4f577cb6-cb51-4001-88c8-5b06ae63490e';
@@ -14,6 +15,14 @@ const Auth = () => {
     const navigate = useNavigate();
     const [ authenticatedUser, setAuthenticatedUser ] = useState("");
     const { userProfile } = useContext(UserContext);
+
+    const location = useLocation();
+    const handleGoPage = (e) => {
+        if (location.pathname === "/home"){
+            e.preventDefault();
+            window.location.reload(); //refresh the page
+        }
+    }
 
     // Check if user authenticated
     useEffect(() => {
@@ -40,12 +49,14 @@ const Auth = () => {
     return (
         <nav className="nav">
             {userProfile?.imageUrl && (
-                <CustomLink to="/home">
+                <CustomLink to="/home" onClick={handleGoPage}>
+                {/* <div onClick={handleGoPage}> */}
                     <img src={userProfile.imageUrl} alt={userProfile.name} className="user-image-NV" 
                     onLoad={() => console.log("Image loaded successfully.")}
                     onError={(e) => {
                     e.target.src = defaultProfileImage; // Fallback to default image on error
                     console.error("Error loading profile image.");}}/>
+                {/* </div> */}
                 </CustomLink>
             )}
 
