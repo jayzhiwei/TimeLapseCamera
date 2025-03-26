@@ -1,4 +1,4 @@
-import { Link, useMatch, useResolvedPath } from "react-router-dom";
+import { Link, useLocation, useMatch, useResolvedPath } from "react-router-dom";
 import logo from '../../images/logo.svg';
 import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
@@ -20,20 +20,30 @@ export default function Navbar() {
         // Cleanup subscription on unmount
         return () => unsubscribe();
       }, []);
+      const location = useLocation();
+      const handleGoPage = (e) => {
+          if (location.pathname === "/home"){
+              e.preventDefault();
+              window.location.reload(); //refresh the page
+          }
+      }
+      
 
     return (
         <>
         {isLoggedIn ? (
             <nav className="nav">
-                <Link to="/home" className="site-title">
+                <Link to="/home" className="site-title" onClick={handleGoPage}>
+                {/* <div onClick={refreshPage}> */}
                     <img src={logo} className="App-logo" alt="logo"/>
+                {/* </div> */}
                 </Link>
                 <div className="nav-links">
                     {/* <CustomLink to="/album"> <i className="fas fa-image"></i> <span>Albums</span></CustomLink>
                     <CustomLink to="/film"> <i className="fas fa-film"></i> <span>Films</span></CustomLink> 
                     <CustomLink to="/myDevices"> <i className="fas fa-video"> </i><span>Devices</span></CustomLink>*/}
                     <CustomLink to="/PairDevices" className="icons"> <FaLink />&nbsp;Pair</CustomLink>
-                    <CustomLink to="/about" className="icons"><FaCircleInfo />&nbsp;About</CustomLink>
+                    {/* <CustomLink to="/about" className="icons"><FaCircleInfo />&nbsp;About</CustomLink> */}
                     <Auth />
                 </div>
             </nav>
