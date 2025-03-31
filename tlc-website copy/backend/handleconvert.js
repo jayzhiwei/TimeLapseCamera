@@ -1,4 +1,5 @@
 const express = require("express");
+const bodyParser = require('body-parser');
 const fs = require("fs");
 const path = require("path");
 const axios = require("axios");
@@ -8,7 +9,7 @@ const ffmpeg = require("fluent-ffmpeg");
 ffmpeg.setFfmpegPath('C:\\ffmpeg\\bin\\ffmpeg.exe');
 
 const app = express();
-app.use(express.json());
+app.use(bodyParser.json({ limit: '500mb' }));
 app.use(cors());
 
 app.use(
