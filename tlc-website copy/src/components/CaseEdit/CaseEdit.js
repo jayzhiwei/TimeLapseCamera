@@ -63,12 +63,18 @@ const CaseEdit = ({ pi, fullcase, onBack, onUpdateCase }) => {
           [key]: `${datePart}T${hours}:${minutes}:${newSeconds}`,
         };
       }
-      return { ...prevData, [name]: value };
+
+      // Convert intervalValue to number
+      return { 
+        ...prevData, 
+        [name]: name === "intervalValue" ? Number(value) : value 
+      };
     });
   };
 
   useEffect(() => {
     const isSame = JSON.stringify(formData) === JSON.stringify(initialFormData);
+    
     setHasChanges(!isSame);
   }, [formData, initialFormData]);
 
