@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendEmailVerification, updateProfile } from "firebase/auth";
+// , createUserWithEmailAndPassword, sendEmailVerification, updateProfile 
+import { signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signInWithEmailAndPassword} from "firebase/auth";
 import { auth, db } from '../../firebase/firebase';
 import { doc, setDoc, getDoc } from "firebase/firestore";
 import ErrorMsg from '../ErrorMsg/ErrorMsg';
 import SignUp from './Register';
+import './Login.css';
 
 const Login = () => {
     const navigate = useNavigate();
@@ -19,15 +21,15 @@ const Login = () => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if(user)
+            if(user && user.emailVerified)
                 navigate('/home');
             else
-                navigate('/');
+                console.log('User exists but is not verified yet.');
         });
     
         // Cleanup subscription on unmount
         return () => unsubscribe();
-    }, []);
+    });
 
     // Google Sign-In
     const handleGoogleSignIn = () => {
@@ -77,10 +79,10 @@ const Login = () => {
     };
     
     return (
-        <div>
-            <ErrorMsg error = {error} />
+        <div className='app-page'>
             {!isRegistering ? (
-                <div>
+                <div className='App-content'>
+                    <ErrorMsg error = {error} />
                     <h1>Login</h1>
                     <div className="form">
                         <div className="email">

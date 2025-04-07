@@ -1,17 +1,20 @@
 import React, { useState } from 'react';
 import { auth, db } from '../../firebase/firebase';
+import { useNavigate } from 'react-router-dom';
 import { doc, setDoc, getDoc } from "firebase/firestore";
-import { createUserWithEmailAndPassword, sendEmailVerification } from "firebase/auth";
+import { createUserWithEmailAndPassword, sendEmailVerification, onAuthStateChanged } from "firebase/auth";
 import ErrorMsg from '../ErrorMsg/ErrorMsg';
 import Login from './Login';
+import './Login.css';
 
 const Register = () => {
+    const navigate = useNavigate();
     const [error, setError] = useState(null);
     const [haveAcc, setHaveAcc] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-
+    const [userEmailVerified, setuserEmailVerified] = useState(true)
     const isValidEmail = (email) => {const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     };
@@ -21,8 +24,9 @@ const Register = () => {
         const interval = setInterval(() => {
             user.reload().then(async() => {
             if (user.emailVerified) {
+                setuserEmailVerified(true)
                 clearInterval(interval); // Stop polling once verified
-                const updatedUser = auth.currentUser;
+                // const updatedUser = auth.currentUser;
                 // Automatically log the user in
             //   setUserProfile({
             //     name: updatedUser.displayName  || "New User",
@@ -31,7 +35,15 @@ const Register = () => {
             //   setIsSignedIn(true);
                 setError(null);
                 console.log("User email verified, logged in automatically.");
-                
+                const unsubscribe = onAuthStateChanged(auth, (user) => {
+                    if(user && user.emailVerified){
+                        navigate('/home');
+                        window.location.reload();
+                    }
+                    else
+                        console.log('User exists but is not verified yet.');
+                });
+                return () => unsubscribe();
             }
             }).catch((error) => {
                 console.error("Error reloading user:", error);
@@ -69,6 +81,7 @@ const Register = () => {
             sendEmailVerification(user)
             .then(() => {
                 setError("Verification email sent. Please check your inbox.");
+                setuserEmailVerified(false)
                 pollEmailVerification(user);
             })
             .catch((error) => {
@@ -85,9 +98,9 @@ const Register = () => {
 
     return (
         <>
-            <ErrorMsg error = {error} />
             {!haveAcc ? (
-                <div>
+                <div className='App-content'>
+                    <ErrorMsg error = {error} />
                     <h1>Register</h1>
                     <div className="form">
                         <div className="email">
@@ -148,20 +161,20 @@ const Register = () => {
                             className='loginSignUpbutton'
                             onClick={handleEmailSignUp}
                             disabled={
-                                !isValidEmail(email) || password.length < 6 || confirmPassword !== password
+                                !userEmailVerified || !isValidEmail(email) || password.length < 6 || confirmPassword !== password
                             }
                             style={{
                                 opacity:
-                                !isValidEmail(email) || password.length < 6 || confirmPassword !== password
+                                !userEmailVerified || !isValidEmail(email) || password.length < 6 || confirmPassword !== password
                                     ? 0.5
                                     : 1,
                                 cursor:
-                                !isValidEmail(email) || password.length < 6 || confirmPassword !== password
+                                !userEmailVerified || !isValidEmail(email) || password.length < 6 || confirmPassword !== password
                                     ? "not-allowed"
                                     : "pointer",
                             }}
                         >
-                            Sign Up
+                            Sent Verification Email
                         </button>
                         <p className="toggle-text" onClick={() => setHaveAcc(!haveAcc)}>
                             Already have an account? Sign In

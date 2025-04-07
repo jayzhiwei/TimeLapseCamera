@@ -11,6 +11,7 @@ import LoginSignUp from './pages/LoginSignUp/LoginSignUp'
 import { UserProvider, UserContext } from './components/UserContext'; // Import UserContext here
 import { auth } from './firebase/firebase';
 import { onAuthStateChanged } from 'firebase/auth';
+import './App.css';
 
 const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=d30677b9-e6f4-459d-bd54-070f5f3002cc';
 

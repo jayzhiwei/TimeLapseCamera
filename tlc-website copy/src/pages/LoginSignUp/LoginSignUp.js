@@ -7,7 +7,7 @@ function LoginSignUp(){
 
     return (
         <div className="App-background">
-            <Login />
+            <Login/>
         </div>
     );
 }

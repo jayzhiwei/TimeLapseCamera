@@ -1,6 +1,5 @@
 import React from 'react';
 import { TbAlertTriangleFilled } from "../../images/Icons"
-
 import './ErrorMsg.css';
 
 const ErrorMsg = ({ error }) => {

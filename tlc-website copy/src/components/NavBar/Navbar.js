@@ -4,7 +4,8 @@ import { useState, useEffect } from 'react';
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from '../../firebase/firebase.js';
 import Auth from "./Auth";
-import { FaLink, FaCircleInfo } from "../../images/Icons.js"
+// FaCircleInfo
+import { FaLink,  } from "../../images/Icons.js"
 import './Navbar.css';
 
 // const defaultProfileImage = 'https://firebasestorage.googleapis.com/v0/b/timelapsefyp2024.appspot.com/o/profile_pictures%2FdefaultProfileImg.png?alt=media&token=4f577cb6-cb51-4001-88c8-5b06ae63490e';
@@ -14,8 +15,12 @@ export default function Navbar() {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
-            setIsLoggedIn(!!user); // Set true if user exists otherwise false
-        });
+            if (user) {
+                setIsLoggedIn(user.emailVerified);
+            } else {
+                setIsLoggedIn(false);
+            }
+        },[]);
     
         // Cleanup subscription on unmount
         return () => unsubscribe();
@@ -27,7 +32,6 @@ export default function Navbar() {
               window.location.reload(); //refresh the page
           }
       }
-      
 
     return (
         <>
