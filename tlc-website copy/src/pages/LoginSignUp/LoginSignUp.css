@@ -15,9 +15,10 @@
     div{
         display: flex;
         flex-direction: column;
-        margin-bottom: 5px;
+        margin-bottom: 1px;
         
         span {
+            margin-top: 5px;
             text-align: start;
             max-width: 300px;
             font-size: 13px;
@@ -26,6 +27,7 @@
         }
 
         span.errorMsg {
+            margin-top: 5px;
             text-align: start;
             max-width: 300px;
             font-size: 13px;

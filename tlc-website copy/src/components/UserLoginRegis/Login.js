@@ -108,10 +108,10 @@ const Login = () => {
                         <button
                             className='loginSignUpbutton'
                             onClick={handleEmailSignIn}
-                            disabled={!isValidEmail(email) || password.length < 6}
+                            disabled={!isValidEmail(email) || password.length < 12}
                             style={{
-                                opacity: !isValidEmail(email) || password.length < 6 ? 0.5 : 1,
-                                cursor: !isValidEmail(email) || password.length < 6 ? "not-allowed" : "pointer",
+                                opacity: !isValidEmail(email) || password.length < 12 ? 0.5 : 1,
+                                cursor: !isValidEmail(email) || password.length < 12 ? "not-allowed" : "pointer",
                             }}
                         >
                             Sign In

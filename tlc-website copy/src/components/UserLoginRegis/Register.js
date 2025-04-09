@@ -18,6 +18,19 @@ const Register = () => {
     const isValidEmail = (email) => {const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         return regex.test(email);
     };
+    const hasUpperCase = (str) => /[A-Z]/.test(str);
+    const hasLowerCase = (str) => /[a-z]/.test(str);
+    const hasNumber = (str) => /\d/.test(str);
+    const hasSpecialChar = (str) =>  /[\W_]/.test(str);
+    const isValidPassword = (pwd) => {
+        return (
+          pwd.length >= 12 &&
+          hasUpperCase(pwd) &&
+          hasLowerCase(pwd) &&
+          hasNumber(pwd) &&
+          hasSpecialChar(pwd)
+        );
+      };      
 
     // Function to poll for email verification status
     const pollEmailVerification = (user) => {
@@ -128,14 +141,27 @@ const Register = () => {
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 className="input"
+                                autoComplete="new-password"
                             />
                             {/* Validate password */}
                             {password !== "" && (
-                                <span className={password.length >= 6 ? "" : "errorMsg"}>
-                                {password.length >= 6
-                                    ? "✅ Password is valid"
-                                    : "❌ Password must be at least 6 characters"}
-                                </span>
+                                <div className="password-requirements">
+                                    <p className={hasUpperCase(password) ? "valid" : "invalid"}>
+                                        {hasUpperCase(password) ? "✅" : "❌"} Require uppercase character
+                                    </p>
+                                    <p className={hasLowerCase(password) ? "valid" : "invalid"}>
+                                        {hasLowerCase(password) ? "✅" : "❌"} Require lowercase character
+                                    </p>
+                                    <p className={hasSpecialChar(password) ? "valid" : "invalid"}>
+                                        {hasSpecialChar(password) ? "✅" : "❌"} Require special character
+                                    </p>
+                                    <p className={hasNumber(password) ? "valid" : "invalid"}>
+                                        {hasNumber(password) ? "✅" : "❌"} Require numeric character
+                                    </p>
+                                    <p className={password.length >= 12 ? "valid" : "invalid"}>
+                                        {password.length >= 12 ? "✅" : "❌"} Must be at least 12 characters long
+                                    </p>
+                                </div>
                             )}
                         </div>
 
@@ -146,6 +172,7 @@ const Register = () => {
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 className="input"
+                                autoComplete="new-password"
                             />
                             {/* Validate confirm password */}
                             {confirmPassword !== "" && (
@@ -161,15 +188,15 @@ const Register = () => {
                             className='loginSignUpbutton'
                             onClick={handleEmailSignUp}
                             disabled={
-                                !userEmailVerified || !isValidEmail(email) || password.length < 6 || confirmPassword !== password
+                                !userEmailVerified || !isValidEmail(email) || !isValidPassword(password) || confirmPassword !== password
                             }
                             style={{
                                 opacity:
-                                !userEmailVerified || !isValidEmail(email) || password.length < 6 || confirmPassword !== password
+                                !userEmailVerified || !isValidEmail(email) || !isValidPassword(password) || confirmPassword !== password
                                     ? 0.5
                                     : 1,
                                 cursor:
-                                !userEmailVerified || !isValidEmail(email) || password.length < 6 || confirmPassword !== password
+                                !userEmailVerified || !isValidEmail(email) || !isValidPassword(password) || confirmPassword !== password
                                     ? "not-allowed"
                                     : "pointer",
                             }}

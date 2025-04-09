@@ -16,3 +16,24 @@
     flex-direction: column;
     align-self: center !important;
 }
+
+.password-requirements {
+    margin-top: 5px;
+    font-size: 13px;
+    line-height: 1.4;
+    text-align: start;
+    font-weight: bold;
+  }
+  
+  .password-requirements p {
+    margin: 0px 0;
+  }
+  
+  .password-requirements .valid {
+    color: green;
+  }
+  
+  .password-requirements .invalid {
+    color: red;
+  }
+  

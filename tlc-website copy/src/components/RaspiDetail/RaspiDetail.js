@@ -419,6 +419,7 @@ return (
                                     setIsModalOpen(true);
                                     setCaseToDelete(timeLapseCase.id);
                                     }}
+                                    disabled={timeLapseCase.status === "running"}
                                 >
                                     <MdDelete />
                                 </button>
