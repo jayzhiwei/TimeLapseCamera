@@ -1,10 +1,11 @@
+// Img2Video.js
 import React, { useState, useEffect } from "react";
 import "../../App.css";
 import "./Img2Video.css";
 import axios from "axios";
 import { getStorage, ref, uploadBytesResumable, updateMetadata } from "firebase/storage";
 import { getAuth } from "firebase/auth";
-import { MdFileDownload, MdCloudUpload, FaPlus } from "../../images/Icons.js"
+import { MdFileDownload, MdCloudUpload, FaPlus } from "../../images/Icons.js";
 
 const resolutions = {
   "Max_View": { label: "12MP (4056x3040)", rank: 6 },
@@ -16,39 +17,32 @@ const resolutions = {
 };
 
 const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
-    const [uploadStatus, setUploadStatus] = useState("");
-    const [fps, setFps] = useState(6); 
-    const [resolution, setResolution] = useState(""); // Default resolution
-    const [availableResolutions, setAvailableResolutions] = useState([]);
-    const [originalR, setoriginalR] = useState("");
-    const [customName, setCustomName] = useState("");
-    const auth = getAuth();
-    const currentUser = auth.currentUser;
-    const userUID = currentUser ? currentUser.uid : null;
-  // console.log(imageURLs[0].metadata.customMetadata.Resolution)
+  const [uploadStatus, setUploadStatus] = useState("");
+  const [fps, setFps] = useState(6);
+  const [resolution, setResolution] = useState("");
+  const [availableResolutions, setAvailableResolutions] = useState([]);
+  const [originalR, setoriginalR] = useState("");
+  const [customName, setCustomName] = useState("");
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  const userUID = currentUser ? currentUser.uid : null;
 
   useEffect(() => {
-      const originalResolutionKey =fullcase.resolution;
-      setoriginalR(originalResolutionKey)
-      // Find the rank of the original resolution
-      const originalResolution = resolutions[originalResolutionKey]
-      if (originalResolution) {
-        // Filter resolutions by rank
-        const filteredResolutions = Object.entries(resolutions).filter(
-          ([, { rank }]) => rank <= originalResolution.rank
-        );
-  
-        setAvailableResolutions(filteredResolutions);
-        setResolution((currentResolution) => currentResolution || originalResolutionKey); // Set default to the original resolution
-      } else {
-        console.warn("Original resolution key not found in predefined resolutions.");
-      }
-
+    const originalResolutionKey = fullcase.resolution;
+    setoriginalR(originalResolutionKey);
+    const originalResolution = resolutions[originalResolutionKey];
+    if (originalResolution) {
+      const filteredResolutions = Object.entries(resolutions).filter(
+        ([, { rank }]) => rank <= originalResolution.rank
+      );
+      setAvailableResolutions(filteredResolutions);
+      setResolution((currentResolution) => currentResolution || originalResolutionKey);
+    } else {
+      console.warn("Original resolution key not found in predefined resolutions.");
+    }
   }, [imageURLs]);
 
-
   const urls = imageURLs.map((image) => image.url);
-  // console.log(urls)
 
   const now = new Date();
   const formattedNow = `${now.getFullYear()}-${(now.getMonth() + 1)
@@ -63,26 +57,58 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
 
   const fileName = `video_${formattedNow.replace(/-/g, "").replace(/:/g, "").replace(/ /g, "_")}.mp4`;
 
+  const pollJobStatus = async (jobId) => {
+    const pollInterval = 500; // 0.5 seconds
+    return new Promise((resolve, reject) => {
+      const intervalId = setInterval(async () => {
+        try {
+          console.log("Polling job status for job:", jobId);
+          const statusResponse = await axios.get(`${process.env.REACT_APP_API_URL}/job-status/${jobId}`);
+          console.log("Full job status response:", statusResponse.data);
+          const { status, progress, result } = statusResponse.data;
+          console.log("Progress object received:", progress);
+          const downloadProgress = progress.download || { current: 0, total: 0 };
+          const conversionProgress = progress.conversion || { current: 0, total: 0 };
+          // Use the progress.stage override.
+          const displayStatus = (progress && progress.stage === "Completed") ? "completed" : status;
+          setUploadStatus(
+            `Job status: ${displayStatus} | Download: ${downloadProgress.current}/${downloadProgress.total} | Conversion: ${conversionProgress.current}/${conversionProgress.total}`
+          );
+          if (displayStatus === "completed") {
+            clearInterval(intervalId);
+            if (result && result.videoPath) {
+              resolve(result);
+            } else {
+              reject(new Error("Job completed but videoPath is missing."));
+            }
+          } else if (status === "failed") {
+            clearInterval(intervalId);
+            reject(new Error("Video conversion failed."));
+          }
+        } catch (error) {
+          clearInterval(intervalId);
+          reject(error);
+        }
+      }, pollInterval);
+    });
+  };
+
   const handleVideoConversion = async (saveToCloud = false, download = true) => {
     try {
-      setUploadStatus("Converting images to video...");
+      setUploadStatus("Submitting conversion job...");
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/convert`,
-        {
-          imageUrls: urls, // Use passed imageUrls
-          fps,
-          resolution,
-          fileName,
-        },
-        {
-          responseType: "arraybuffer", // Handle video file download
-        }
+        { imageUrls: urls, fps, resolution, fileName }
       );
-      
+      const jobId = response.data.jobId;
+      setUploadStatus("Conversion job submitted. Waiting for completion...");
+      const jobResult = await pollJobStatus(jobId);
       setUploadStatus("Video generated successfully!");
-      const videoBlob = new Blob([response.data], { type: "video/mp4" });
-
-      // Download the video
+      const videoResponse = await axios.get(
+        `${process.env.REACT_APP_API_URL}/download?fileUrl=${encodeURIComponent(jobResult.videoPath)}&customName=${fileName}`,
+        { responseType: "arraybuffer" }
+      );
+      const videoBlob = new Blob([videoResponse.data], { type: "video/mp4" });
       if (download) {
         const videoUrl = URL.createObjectURL(videoBlob);
         const link = document.createElement("a");
@@ -92,16 +118,11 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
         link.click();
         link.remove();
       }
-
-      // Upload to Firebase Storage
       if (saveToCloud) {
         setUploadStatus("Uploading video to the cloud...");
         const storage = getStorage();
         const storageRef = ref(storage, `films/${userUID}/${pi}/${fullcase.id}/${fileName}`);
-        const uploadTask = uploadBytesResumable(storageRef, videoBlob, {
-          contentType: "video/mp4", // Explicitly set the MIME type
-        });
-
+        const uploadTask = uploadBytesResumable(storageRef, videoBlob, { contentType: "video/mp4" });
         uploadTask.on(
           "state_changed",
           (snapshot) => {
@@ -132,13 +153,11 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
 
   return (
     <div className="App-background">
-      <h1>Images to Video Convertion</h1>
+      <h1>Images to Video Conversion</h1>
       <p><strong>{fullcase.name}</strong></p>
       <p><strong>Total Images: </strong>{fullcase.picturesCaptured}</p>
-      {/* <p>Case ID: <strong>{caseId}</strong></p>
-      <p>Device Serial: <strong>{pi}</strong></p> */}
       <div className="settings">
-      <label>
+        <label>
           File Name:
           <input
             type="text"
@@ -147,13 +166,12 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
             placeholder="Enter a custom name for the video"
           />
         </label>
-
         <label>
-          Frame per second (FPS): 
+          Frame per second (FPS):
           <select
             id="fps"
             value={fps}
-            onChange={(e) => setFps(Number(e.target.value))} // Update FPS
+            onChange={(e) => setFps(Number(e.target.value))}
           >
             {Array.from({ length: 60 }, (_, i) => i + 1).map((value) => (
               <option key={value} value={value}>
@@ -163,25 +181,27 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
           </select>
         </label>
         <label>
-          Resolution: 
-            <select value={resolution} onChange={(e) => setResolution(e.target.value)}>
-              {availableResolutions.map(([key, { label }]) => (
-                <option key={key} value={key}>
-                  {label}
-                  {key === originalR  && " (original resolution)"}
-                </option>
-              ))}
-            </select>
+          Resolution:
+          <select value={resolution} onChange={(e) => setResolution(e.target.value)}>
+            {availableResolutions.map(([key, { label }]) => (
+              <option key={key} value={key}>
+                {label}{key === originalR && " (original resolution)"}
+              </option>
+            ))}
+          </select>
         </label>
       </div>
-
       <div className="button-group">
         <button onClick={() => handleVideoConversion(false, true)}><MdFileDownload /></button>
         <button onClick={() => handleVideoConversion(true, false)}><MdCloudUpload /></button>
-        <button onClick={() => handleVideoConversion(true, true)}><MdFileDownload /> <FaPlus /> <MdCloudUpload /></button>
+        <button onClick={() => handleVideoConversion(true, true)}>
+          <MdFileDownload /> <FaPlus /> <MdCloudUpload />
+        </button>
       </div>
       {uploadStatus && <p>{uploadStatus}</p>}
-      <button onClick={onBack}>Back</button>
+      <button className="back-button" onClick={onBack}>
+          Back
+        </button>
     </div>
   );
 };

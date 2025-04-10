@@ -1,0 +1,44 @@
+/* Input and select styling */
+.settings input[type="text"],
+.settings select {
+  width: 100%;
+  padding: 8px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+}
+
+/* Grouping buttons together */
+.button-group {
+  margin-top: 20px;
+}
+
+/* Style the buttons used for download/upload */
+.button-group button {
+  background-color: #007bff;
+  border: none;
+  color: #fff;
+  padding: 10px 10px;
+  margin: 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 20px;
+  transition: background-color 0.2s ease;
+}
+
+/* Hover state for buttons */
+.button-group button:hover {
+  background-color: #0056b3;
+}
+
+.back-button {
+    padding: 10px 20px;
+    background-color: #007bff; /* Blue background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 20px;
+    transition: background-color 0.3s ease;
+  }
