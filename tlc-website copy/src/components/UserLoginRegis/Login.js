@@ -114,7 +114,7 @@ const Login = () => {
                                 cursor: !isValidEmail(email) || password.length < 12 ? "not-allowed" : "pointer",
                             }}
                         >
-                            Sign In
+                            Sign in
                         </button>
 
                         <button onClick={handleGoogleSignIn} className="google-button">
@@ -126,7 +126,7 @@ const Login = () => {
                             Sign in with Google
                         </button>
                         <p className="toggle-text" onClick={() => setIsRegistering(!isRegistering)}>
-                            Don't have an account? Sign Up
+                            Don't have an account? Sign up
                         </p>
                     </div>
                 </div>

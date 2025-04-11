@@ -204,7 +204,7 @@ const Register = () => {
                             Sent Verification Email
                         </button>
                         <p className="toggle-text" onClick={() => setHaveAcc(!haveAcc)}>
-                            Already have an account? Sign In
+                            Already have an account? Sign in
                         </p>
                     </div>
                 </div>
