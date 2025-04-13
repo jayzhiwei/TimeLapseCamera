@@ -169,7 +169,8 @@ const RaspiDetail = ({pi, onBack}) => {
     if (showCaseAddPage) {
         return (
             <CaseAdd
-                pi={pi.serial}
+                pi={pi}
+                allCases={timeLapseCases}
                 onBack={() => setShowCaseAddPage(false)} // Back to RaspiDetail
                 onUpdateCase={(newCase) => {
                     // Append the new case to timeLapseCases

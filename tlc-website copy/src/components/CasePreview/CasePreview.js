@@ -188,7 +188,8 @@ const CasePreview = ({ pi, allCases, fullcase, onBack, onUpdateCase }) => {
             onUpdateCase={onUpdateCase} // Pass the callback to propagate changes
         />
     );
-}
+  }
+  console.log(pi)
 
     return (
         <div className="App-background">

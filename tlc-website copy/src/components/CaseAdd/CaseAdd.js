@@ -4,11 +4,11 @@ import "../../App.css";
 import { addDoc, collection, serverTimestamp } from "firebase/firestore";
 import { db } from "../../firebase/firebase.js";
 
-const CaseAdd = ({ pi, onBack, onUpdateCase }) => {
+const CaseAdd = ({ pi, allCases, onBack, onUpdateCase }) => {
     // const auth = getAuth();
     // const currentUser = auth.currentUser;
     // const userUID = currentUser ? currentUser.uid : null;
-
+    const [ canRun, setCanRun ] = useState(true);
     // Helper: Format DateTime for UTC storage
     const toUTC = (localTime) => {
         const localDate = new Date(localTime);
@@ -26,6 +26,20 @@ const CaseAdd = ({ pi, onBack, onUpdateCase }) => {
         const minutes = localDate.getMinutes().toString().padStart(2, "0");
         return `${year}-${month}-${day}T${hours}:${minutes}`;
     };
+
+    useEffect(() => {
+        const checkTimeLapseCasesStatus = async () => {
+            for(let i = 0; i < allCases.length; i++){
+            const item = allCases[i]
+            // console.log(item.id)
+            if(item.status === "running"){
+                setCanRun(false);
+                break;
+            }
+            }
+        };
+        checkTimeLapseCasesStatus();
+    }, []);
 
     // Memoized Initial Form Data
     const initialFormData = useMemo(() => {
@@ -189,6 +203,8 @@ const CaseAdd = ({ pi, onBack, onUpdateCase }) => {
         </div>
         );
     };
+    console.log(pi)
+    console.log(pi.online)
 
     return (
         <div className="App-background">
@@ -210,11 +226,19 @@ const CaseAdd = ({ pi, onBack, onUpdateCase }) => {
                         )}
                         
                         {key === "status" && (
-                            <select id={key} name={key} value={formData[key]} onChange={handleChange}>
-                                {/* <option value="aborted">Stop</option> */}
-                                <option value="running">Start</option>
-                                <option value="standby">Standby</option>
-                            </select>
+                            <select 
+                                id={key} 
+                                name={key} 
+                                value={formData[key]} 
+                                onChange={handleChange}
+                                disabled={pi.online === false || canRun === false}
+                            >
+                            {/* <option value="aborted">Stop</option> */}
+                            <option value="running" >
+                                Start
+                            </option>
+                            <option value="standby">Standby</option>
+                        </select>
                         )}
 
                         {key === "intervalValue" && (
