@@ -105,7 +105,7 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
       const jobResult = await pollJobStatus(jobId);
       setUploadStatus("Video generated successfully!");
       const videoResponse = await axios.get(
-        `${process.env.REACT_APP_API_URL}/download?fileUrl=${encodeURIComponent(jobResult.videoPath)}&customName=${fileName}`,
+        `${process.env.REACT_APP_API_URL}/download?fileUrl=${encodeURIComponent(jobResult.videoPath)}&customName=${customName}`,
         { responseType: "arraybuffer" }
       );
       const videoBlob = new Blob([videoResponse.data], { type: "video/mp4" });
@@ -113,7 +113,7 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
         const videoUrl = URL.createObjectURL(videoBlob);
         const link = document.createElement("a");
         link.href = videoUrl;
-        link.setAttribute("download", fileName);
+        link.setAttribute("download", customName);
         document.body.appendChild(link);
         link.click();
         link.remove();

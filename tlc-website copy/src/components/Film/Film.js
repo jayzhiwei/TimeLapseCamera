@@ -63,35 +63,33 @@ const Film = ({ pi, caseId, caseName, onBack }) => {
     fetchVideos();
   }, [userUID, pi, caseId, imageKitBaseURL]);
 
+console.log(firebaseUrls[0])
 
   const handleDownload = async (fileUrl, customName) => {
     try {
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL}/download?fileUrl=${encodeURIComponent(
+        `${process.env.REACT_APP_API_URL}/downloadFirestorageVideo?fileUrl=${encodeURIComponent(
           fileUrl
         )}&customName=${encodeURIComponent(customName)}`,
         {
           method: "GET",
         }
       );
-  
+      
       if (!response.ok) {
         throw new Error("Failed to download the file.");
       }
-  
-      // Create a blob from the response
-      const blob = await response.blob();
-  
-      // Create a download link
-      const blobUrl = URL.createObjectURL(blob);
+
+      // Create a blob from the response and a URL to download it.
+      const blob = await response.blob(); 
+      const downloadUrl = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
-      link.href = blobUrl;
-      link.download = customName || "video.mp4"; // Custom filename
+      link.href = downloadUrl;
+      link.setAttribute("download", customName || "video.mp4");
       document.body.appendChild(link);
       link.click();
-      document.body.removeChild(link);
-  
-      URL.revokeObjectURL(blobUrl); // Clean up
+      link.remove();
+      window.URL.revokeObjectURL(downloadUrl); // Clean up the object URL
     } catch (error) {
       console.error("Error downloading the file:", error);
     }

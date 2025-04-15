@@ -147,20 +147,21 @@ function Home() {
   function handleSelectedPi(pi){
       setSelectedPi(pi);
   };
-
+// console.log(auth.currentUser)
   return (
     <div className="App-background">
       <ErrorMsg error={error} />
       { selectedPi === null && (<div>
         <div className="user-info">
-          <img src={userProfile.imageUrl} 
+          <img src={userProfile.imageUrl}
           alt={userProfile.name} 
-          className="user-image" 
+          className="user-image"
           onLoad={() => console.log("Image loaded successfully.")}
           onError={(e) => {
             e.target.src = defaultProfileImage; // Fallback to default image on error
             console.error("Error loading profile image.");}}
           onClick={handleProfilePictureClick}
+          hidden = {auth.currentUser === null}
           />
 
           {isEditingName ? (
@@ -191,6 +192,7 @@ function Home() {
                   setNewName(userProfile.name || "");
                 }}
                 className="edit-name-button"
+                hidden = {auth.currentUser === null}
               >
                 Change Name
               </button>
@@ -202,7 +204,12 @@ function Home() {
           <div className="profile-picture-upload">
             <input type="file" onChange={handleFileChange} />
             {selectedFile && (
-              <button onClick={handleUploadProfilePicture} className="upload-button">Upload New Profile Picture</button>
+              <button
+                  onClick={handleUploadProfilePicture}
+                  className="upload-button"
+                  >
+                  Upload New Profile Picture
+              </button>
             )}
           </div>
         )}

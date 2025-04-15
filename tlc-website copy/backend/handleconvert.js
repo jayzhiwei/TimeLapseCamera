@@ -138,6 +138,36 @@ app.get("/download", async (req, res) => {
   }
 });
 
+app.get("/downloadFirestorageVideo", async (req, res) => {
+  const fileUrl = req.query.fileUrl;
+  const customName = req.query.customName || "video.mp4";
+
+  if (!fileUrl) {
+    return res.status(400).json({ error: "fileUrl is required" });
+  }
+
+  try {
+    const axiosResponse = await axios({
+      url: fileUrl,
+      method: "GET",
+      responseType: "stream",
+      headers: { "User-Agent": "Mozilla/5.0" },
+    });
+
+    // Set headers and pipe directly to response
+    res.set({
+      "Content-Type": "video/mp4",
+      "Content-Disposition": `attachment; filename="${customName}"`,
+    });
+
+    axiosResponse.data.pipe(res);
+
+  } catch (error) {
+    console.error("Error:", error.message);
+    res.status(500).json({ error: "Failed to download video" });
+  }
+});
+
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
