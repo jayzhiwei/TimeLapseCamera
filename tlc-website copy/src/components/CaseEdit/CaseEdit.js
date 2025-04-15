@@ -221,7 +221,7 @@ const CaseEdit = ({ pi, fullcase, onBack, onUpdateCase }) => {
       </div>
     );
   };
-
+console.log()
   return (
     <div className="App-background">
       <form className="edit-case-form">

@@ -132,7 +132,7 @@ const CaseAdd = ({ pi, allCases, onBack, onUpdateCase }) => {
                 statusUpdated_at: null
             };
 
-            const timeLapseRef = collection(db, `raspberrys/${pi}/TimeLapseCase`);
+            const timeLapseRef = collection(db, `raspberrys/${pi.serial}/TimeLapseCase`);
 
             const docRef = await addDoc(timeLapseRef, newCase);
             // Create the complete case object with the ID
@@ -148,6 +148,8 @@ const CaseAdd = ({ pi, allCases, onBack, onUpdateCase }) => {
             alert("Failed to add new case. Please try again.");
         }
     };
+
+console.log(pi.serial)
 
     // Helper: Render Time with Seconds
     const renderTimeWithSeconds = (key, timeKey, label) => {
@@ -203,8 +205,8 @@ const CaseAdd = ({ pi, allCases, onBack, onUpdateCase }) => {
         </div>
         );
     };
-    console.log(pi)
-    console.log(pi.online)
+    console.log(formData)
+    // console.log(pi.online)
 
     return (
         <div className="App-background">
