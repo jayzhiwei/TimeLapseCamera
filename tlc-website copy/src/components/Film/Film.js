@@ -50,7 +50,7 @@ const Film = ({ pi, caseId, caseName, onBack }) => {
           metadataList.push(metadata); // Store metadata separately
         }
         setfirebaseUrls(firebaseurls);
-        setVideoUrls(urls); // Store ImageKit URLs
+        setVideoUrls(firebaseurls); // Store ImageKit URLs
         setMetadata(metadataList); // Store metadata
       } catch (err) {
         console.error("Failed to fetch videos:", err);
