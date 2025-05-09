@@ -1,4 +1,3 @@
-// Img2Video.js
 import React, { useState, useEffect } from "react";
 import "../../App.css";
 import "./Img2Video.css";
@@ -18,7 +17,8 @@ const resolutions = {
 
 const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
   const [uploadStatus, setUploadStatus] = useState("");
-  const [fps, setFps] = useState(6);
+  const [videoDuration, setVideoDuration] = useState("");
+  const [fps, setFps] = useState("");
   const [resolution, setResolution] = useState("");
   const [availableResolutions, setAvailableResolutions] = useState([]);
   const [originalR, setoriginalR] = useState("");
@@ -151,11 +151,62 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
     }
   };
 
+  function suggestedFps(picturesCaptured, targetSeconds = 20) {
+    const raw = Math.round(picturesCaptured / targetSeconds); // images ÷ seconds
+    return Math.max(1, Math.min(60, raw));                   // clamp to 1-60 fps
+  }
+
+  useEffect(() => {
+    if (fullcase?.picturesCaptured != null) {
+      const calculatedFps = suggestedFps(fullcase.picturesCaptured);
+      setFps(calculatedFps);
+    }
+  }, [fullcase]);
+
+  const calculateVideoDuration = (picturesCaptured, fps) => {
+    if (!picturesCaptured || !fps) return "";
+    
+    const durationInSeconds = picturesCaptured / fps;
+    const minutes = Math.floor(durationInSeconds / 60);
+    const seconds = Math.floor(durationInSeconds % 60);
+    
+    return `${minutes}m ${seconds}s`;
+  };
+
+  useEffect(() => {
+    if (fullcase?.picturesCaptured != null) {
+      const calculatedFps = suggestedFps(fullcase.picturesCaptured);
+      setFps(calculatedFps);
+      setVideoDuration(calculateVideoDuration(fullcase.picturesCaptured, calculatedFps));
+    }
+  }, [fullcase]);
+  
+  useEffect(() => {
+    if (fps && fullcase?.picturesCaptured) {
+      setVideoDuration(calculateVideoDuration(fullcase.picturesCaptured, fps));
+    }
+  }, [fps, fullcase.picturesCaptured]);
+
   return (
     <div className="App-background">
-      <h1>Images to Video Conversion</h1>
-      <p><strong>{fullcase.name}</strong></p>
-      <p><strong>Total Images: </strong>{fullcase.picturesCaptured}</p>
+        <h1>Images to Video Conversion</h1>
+        <div className="IVC">
+          <strong>{fullcase.name}</strong>
+          <div className="container">
+            <strong>Total Images: </strong> {fullcase.picturesCaptured}
+          </div>
+          {videoDuration && (
+                <div className="duration-info">
+                  <strong>Expected Duration:</strong> {videoDuration}
+                  {fps !== suggestedFps(fullcase.picturesCaptured) && (
+                    <span>
+                      {calculateVideoDuration(fullcase.picturesCaptured)}
+                    </span>
+                  )}
+                </div>
+            )}
+        </div>
+
       <div className="settings">
         <label>
           File Name:

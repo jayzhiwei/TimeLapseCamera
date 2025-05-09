@@ -36,22 +36,32 @@ const Film = ({ pi, caseId, caseName, onBack }) => {
           return;
         }
 
-        const firebaseurls = [];
-        const urls = [];
-        const metadataList = [];
+        const videoPromises = res.items.map(async (item) => {
+          const firebaseVideoURL = await getDownloadURL(item);
+          const metadata = await getMetadata(item);
+          const videoPath = firebaseVideoURL.split("/o/")[1];
+          return {
+            firebaseUrl: firebaseVideoURL,
+            imageKitUrl: `${imageKitBaseURL}${videoPath}`,
+            metadata: metadata
+          };
+        });
+
+        const videos = await Promise.all(videoPromises);
         
-        for (const item of res.items) {
-          const firebaseVideoURL = await getDownloadURL(item); // Fetch Firebase URL
-          const metadata = await getMetadata(item); // Fetch metadata
-          const videoPath = firebaseVideoURL.split("/o/")[1]; // Extract the path after '/o/'
-          
-          firebaseurls.push(firebaseVideoURL)
-          urls.push(`${imageKitBaseURL}${videoPath}`); // Transform to ImageKit URL
-          metadataList.push(metadata); // Store metadata separately
-        }
-        setfirebaseUrls(firebaseurls);
-        setVideoUrls(firebaseurls); // Store ImageKit URLs
-        setMetadata(metadataList); // Store metadata
+        // Sort by timeCreated (newest first)
+        videos.sort((a, b) => 
+          new Date(b.metadata.timeCreated) - new Date(a.metadata.timeCreated)
+        );
+
+        // Extract sorted arrays
+        const sortedFirebaseUrls = videos.map(v => v.firebaseUrl);
+        const sortedImageKitUrls = videos.map(v => v.imageKitUrl);
+        const sortedMetadata = videos.map(v => v.metadata);
+
+        setfirebaseUrls(sortedFirebaseUrls);
+        setVideoUrls(sortedImageKitUrls);
+        setMetadata(sortedMetadata);
       } catch (err) {
         console.error("Failed to fetch videos:", err);
         setError("Failed to load videos for this case.");

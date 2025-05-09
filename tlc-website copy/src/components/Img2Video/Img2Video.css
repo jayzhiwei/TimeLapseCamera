@@ -42,3 +42,14 @@
     margin-bottom: 20px;
     transition: background-color 0.3s ease;
   }
+
+  .duration-info {
+    color: #04e004;
+    font-size: 0.9rem;
+  }
+
+  .IVC{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
