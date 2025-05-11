@@ -312,7 +312,7 @@ return (
                         <GrLinkPrevious />
                     </button>
 
-                    <button className="back-button" onClick={() => {
+                    <button className="create-button" onClick={() => {
                         setShowCaseAddPage(true);
                         setSelectedCaseId(null);
                     }}>
@@ -323,7 +323,7 @@ return (
                         setFilters(initialFilters); // Reset main filters
                     }
                 }>
-                    reset
+                    Reset Filter
                     </button>
                 </div>
 

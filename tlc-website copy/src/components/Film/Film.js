@@ -194,7 +194,6 @@ console.log(firebaseUrls[0])
       </div>
     </div>
   );
-  
 };
 
 export default Film;

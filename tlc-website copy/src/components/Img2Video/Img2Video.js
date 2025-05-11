@@ -26,6 +26,8 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
   const auth = getAuth();
   const currentUser = auth.currentUser;
   const userUID = currentUser ? currentUser.uid : null;
+  const [inProgress, setInProgress] = useState(false);
+  
 
   useEffect(() => {
     const originalResolutionKey = fullcase.resolution;
@@ -62,6 +64,7 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
     return new Promise((resolve, reject) => {
       const intervalId = setInterval(async () => {
         try {
+          setInProgress(true)
           console.log("Polling job status for job:", jobId);
           const statusResponse = await axios.get(`${process.env.REACT_APP_API_URL}/job-status/${jobId}`);
           console.log("Full job status response:", statusResponse.data);
@@ -76,18 +79,23 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
           );
           if (displayStatus === "completed") {
             clearInterval(intervalId);
+            setInProgress(false)
             if (result && result.videoPath) {
               resolve(result);
+              setInProgress(false)
             } else {
               reject(new Error("Job completed but videoPath is missing."));
+            setInProgress(false)
             }
           } else if (status === "failed") {
             clearInterval(intervalId);
             reject(new Error("Video conversion failed."));
+            setInProgress(false)
           }
         } catch (error) {
           clearInterval(intervalId);
           reject(error);
+          setInProgress(false)
         }
       }, pollInterval);
     });
@@ -95,6 +103,7 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
 
   const handleVideoConversion = async (saveToCloud = false, download = true) => {
     try {
+      setInProgress(true)
       setUploadStatus("Submitting conversion job...");
       const response = await axios.post(
         `${process.env.REACT_APP_API_URL}/convert`,
@@ -148,6 +157,8 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
     } catch (error) {
       console.error("Error processing video:", error);
       setUploadStatus("An error occurred while processing the video.");
+    } finally{
+      setInProgress(false)
     }
   };
 
@@ -243,14 +254,15 @@ const Img2Video = ({ pi, fullcase, imageURLs, onBack }) => {
         </label>
       </div>
       <div className="button-group">
-        <button onClick={() => handleVideoConversion(false, true)}><MdFileDownload /></button>
-        <button onClick={() => handleVideoConversion(true, false)}><MdCloudUpload /></button>
-        <button onClick={() => handleVideoConversion(true, true)}>
-          <MdFileDownload /> <FaPlus /> <MdCloudUpload />
-        </button>
+        <button onClick={() => handleVideoConversion(false, true)} disabled={inProgress}>
+          <MdFileDownload /></button>
+        <button onClick={() => handleVideoConversion(true, false)} disabled={inProgress}>
+          <MdCloudUpload /></button>
+        <button onClick={() => handleVideoConversion(true, true)} disabled={inProgress}>
+          <MdFileDownload /> <FaPlus /> <MdCloudUpload /></button>
       </div>
       {uploadStatus && <p>{uploadStatus}</p>}
-      <button className="back-button" onClick={onBack}>
+      <button className="back-button" onClick={onBack} disabled={inProgress}>
           Back
         </button>
     </div>

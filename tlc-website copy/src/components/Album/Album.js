@@ -155,16 +155,18 @@ const Album = ({ pi, fullcase, onBack, onUpdateCase }) => {
       {/* <p>Device Serial: <strong>{pi}</strong></p>
       <p>Displaying Album for Case ID: <strong>{caseId}</strong></p> */}
       
-      <div>
+      <div className="buttonContainer">
         <button
-          className="Details-button"
+          className="button"
           onClick={() => {;
               setShowImg2VideoPage(true);
-          }}>
+          }}
+          disabled = {images.length === 0}
+          >
           Image to Video
         </button>
 
-        <button className="back-button" onClick={onBack}>
+        <button className="button" onClick={onBack}>
           Back
         </button>
       </div>

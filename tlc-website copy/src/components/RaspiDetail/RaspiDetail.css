@@ -1,22 +1,59 @@
 .this-device-details {
   display: flex;
   flex-direction: row;
+  gap: 15px;
   align-items: center;
+  justify-content: start;
   height: fit-content;
   margin: 0px;
 
-  .back-button {
+  .back-button{
+    display: flex;
+    height: fit-content;
     background: none;
     padding: 5px;
-    font-size: 18px;
-    margin-bottom: 0%;
+    font-size: 30px;
+    margin-bottom: 0;
+  }
+
+  .reset-button{
+      padding: 5px 10px;
+      font-size: 18px;
+      background-color: #ff6a00;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+
+  .create-button{
+      padding: 5px 20px;
+      font-size: 18px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+  }
+  .back-button:hover {
+    color: #429dff;
+  }
+
+  .create-button:hover {
+    background-color: #0056b3;
+  }
+  .reset-button:hover {
+    background-color: #af4900;
   }
 }
 
 .device-name {
   text-align: center;
   width: 100%;
-  margin-bottom: 12px;
+  margin-bottom: 0px;
+  margin-top: 0px;
   font-size: 20px;
 }
 
@@ -296,18 +333,18 @@ h1 {
 
     button {
       align-self: flex-end;
-      background-color: white;
+      font-size: 25px;
+      background-color: rgba(255, 255, 255, 0.938);
       border-radius: 8px;
-      opacity: 50%;
       border-style: none;
-      color: rgb(99, 93, 93);
+      color: rgb(71, 71, 71);
       padding-top: 5px;
     }
   }
 
   .small-screen-filter button:hover {
     cursor: pointer;
-    background-color: #4a4e69;
-    color: white;
+    background-color: #b1b1b1;
   }
 }
+

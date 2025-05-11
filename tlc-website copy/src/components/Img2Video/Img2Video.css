@@ -11,11 +11,16 @@
 
 /* Grouping buttons together */
 .button-group {
+  display: flex;
+  flex-direction: row;
   margin-top: 20px;
 }
 
 /* Style the buttons used for download/upload */
 .button-group button {
+  display: flex;
+  flex-direction: row;
+  gap: 5px;
   background-color: #007bff;
   border: none;
   color: #fff;
@@ -25,11 +30,17 @@
   cursor: pointer;
   font-size: 20px;
   transition: background-color 0.2s ease;
+  align-items: center;
+  justify-content: center;
 }
 
 /* Hover state for buttons */
 .button-group button:hover {
   background-color: #0056b3;
+}
+
+.button-group button:disabled {
+  background-color: #767676;
 }
 
 .back-button {
@@ -42,6 +53,10 @@
     margin-bottom: 20px;
     transition: background-color 0.3s ease;
   }
+
+  .back-button:disabled {
+  background-color: #767676;
+}
 
   .duration-info {
     color: #04e004;
