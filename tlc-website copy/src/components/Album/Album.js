@@ -16,6 +16,25 @@ const Album = ({ pi, fullcase, onBack, onUpdateCase }) => {
   const userUID = currentUser ? currentUser.uid : null;
   const [showImg2VideoPage, setShowImg2VideoPage] = useState(false);
   const [localFullcase, setLocalFullcase] = useState(fullcase);
+  const [currentPage, setCurrentPage] = useState(1);
+  const imagesPerPage = 20; // Maximum 20 images per page
+
+  // Calculate the current images to display
+  const indexOfLastImage = currentPage * imagesPerPage;
+  const indexOfFirstImage = indexOfLastImage - imagesPerPage;
+  const currentImages = images.slice(indexOfFirstImage, indexOfLastImage);
+
+  const handleNextPage = () => {
+  if (currentPage * imagesPerPage < images.length) {
+    setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
 
   const formatTimestamp = (timestamp) => {
     const year = timestamp.substring(0, 4);
@@ -155,30 +174,30 @@ const Album = ({ pi, fullcase, onBack, onUpdateCase }) => {
       {/* <p>Device Serial: <strong>{pi}</strong></p>
       <p>Displaying Album for Case ID: <strong>{caseId}</strong></p> */}
       
-      <div className="buttonContainer">
-        <button
-          className="button"
-          onClick={() => {;
-              setShowImg2VideoPage(true);
-          }}
-          disabled = {images.length === 0}
-          >
-          Image to Video
-        </button>
+    <div className="buttonContainer">
+      <button
+        className="button"
+        onClick={() => {
+          setShowImg2VideoPage(true);
+        }}
+        disabled={images.length === 0}
+      >
+        Image to Video
+      </button>
 
-        <button className="button" onClick={onBack}>
-          Back
-        </button>
-      </div>
+      <button className="button" onClick={onBack}>
+        Back
+      </button>
+    </div>
 
-      {loading && <p>Loading images...</p>}
-      {error && <p className="error">{error}</p>}
+    {loading && <p>Loading images...</p>}
+    {error && <p className="error">{error}</p>}
 
-      <div >
-        <div>
-          {images.map(({ url, metadata }, index) => (
-            <div key={index} class="responsive">
-              <div class="gallery">
+    <div>
+      <div>
+        {currentImages.map(({ url, metadata }, index) => (
+          <div key={index} className="responsive">
+            <div className="gallery">
               <a target="_blank" rel="noopener noreferrer" href={url}>
                 <img src={url} alt={`${index}`} width="600" height="400" />
               </a>
@@ -187,16 +206,24 @@ const Album = ({ pi, fullcase, onBack, onUpdateCase }) => {
                 <strong>CPU:</strong> {metadata.customMetadata.CPU} °C<br />
                 <strong>Room:</strong> {metadata.customMetadata.Room} °C<br />
                 <strong>Size:</strong> {formatFileSize(metadata.size)}
-                {/* <p><strong>Name:</strong> {metadata.name}</p> */}
-                {/* <p><strong>Resolution :</strong> {metadata.customMetadata.Resolution}</p> */}
-                {/* <p><strong>Content Type:</strong> {metadata.contentType}</p> */}
               </div>
-              </div>
-              </div>
-          ))}
-          <div class="clearfix"></div>
-        </div>
+            </div>
+          </div>
+        ))}
+        <div className="clearfix"></div>
       </div>
+    </div>
+
+    {/* Pagination Controls */}
+    <div className="pagination">
+      <button onClick={handlePreviousPage} disabled={currentPage === 1}>
+        Previous
+      </button>
+      <span>Page {currentPage} of {Math.ceil(images.length / imagesPerPage)}</span>
+      <button onClick={handleNextPage} disabled={currentPage * imagesPerPage >= images.length}>
+        Next
+      </button>
+    </div>
     </div>
     
   );
