@@ -17,8 +17,8 @@
   }
 
   .reset-button{
-      padding: 5px 10px;
-      font-size: 18px;
+      padding: 5px 8px;
+      font-size: 12px;
       background-color: #ff6a00;
       color: white;
       border: none;
@@ -28,8 +28,8 @@
   }
 
   .create-button{
-      padding: 5px 20px;
-      font-size: 18px;
+      padding: 5px 10px;
+      font-size: 12px;
       background-color: #007bff;
       color: white;
       border: none;
